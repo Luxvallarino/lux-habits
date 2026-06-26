@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -639,7 +638,7 @@ function updateFUI(){
   else{sb.style.display='flex';xb.style.display='none';sl.textContent=p>=100?'✓ Ayuno completado hoy':'Iniciá tu ayuno cuando estés listo';sl.style.color=p>=100?'var(--green)':'var(--t2)';}
 }
 function fastCard(ro){
-  if(ro)return`<div class="fast-card"><div style="display:flex;align-items:center;gap:10px;"><div class="hico" style="background:var(--acc-light);">⏱️</div><div><div class="hname">Ayuno intermitente</div><div class="hsub">Solo disponible en tiempo real</div></div></div></div>`;
+  if(ro)return`<div class="fast-card"><div style="display:flex;align-items:center;gap:10px;"><div class="hico" style="background:var(--acc-light);">⏱️</div><div><div class="hname">Ayuno intermitente</div><div class="hsub">No disponible en días futuros</div></div></div></div>`;
   const prs=PRESETS.map(h=>`<div class="fgp${h===fastGoalH?' on':''}" onclick="setFG(${h})">${h}h</div>`).join('');
   return`<div class="fast-card"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;"><div class="hico" style="background:var(--acc-light);">⏱️</div><div><div class="hname">Ayuno intermitente</div><div class="hsub" id="fast-gd">Meta: ${fastGoalH}h</div></div></div><div class="fast-timer" id="fast-timer">${fmtT(getFE())}</div><div style="padding:8px 0 4px;"><div class="prog-label"><span>Progreso</span><span>${fpct()}%</span></div><div class="pbar"><div class="pfill" id="fast-pf" style="width:${fpct()}%;background:var(--accent);"></div></div></div><div style="margin:6px 0 10px;"><div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">Duración</div><div class="fast-presets" id="fast-presets">${prs}</div></div><div class="fast-btns"><button class="fb start" id="fast-sb" onclick="startFast()">▶ Iniciar</button><button class="fb stop" id="fast-xb" onclick="stopFast()" style="display:none;">⏹ Finalizar</button></div><div class="fast-status" id="fast-st">Iniciá tu ayuno cuando estés listo</div></div>`;
 }
@@ -649,9 +648,9 @@ function selMood(m){if(isFuture())return;curMood=m;const meta=MM[m];document.que
 function saveJournal(){if(isFuture())return;const ds=adate();const q1=document.getElementById('j-q1').value.trim(),q2=document.getElementById('j-q2').value.trim(),q3=document.getElementById('j-q3').value.trim(),q4=document.getElementById('j-q4').value.trim();journalData[ds]={mood:curMood,q1,q2,q3,q4,ts:Date.now()};if(curMood)moodData[ds]={...(moodData[ds]||{}),level:curMood};sv(9,1);render();save();const fb=document.getElementById('j-fb');fb.innerHTML='<span class="saved-badge">✓ Reflexión guardada</span>';setTimeout(()=>{fb.innerHTML='';},3000);}
 
 function renderJournal(){
-  const ds=adate(),ro=!isToday();
+  const ds=adate(),ro=isFuture();
   const jrb=document.getElementById('j-ro-banner'),jsw=document.getElementById('j-save-wrap');
-  if(ro){jrb.style.display='block';jrb.innerHTML=`<div class="ro-banner">📅 Viendo ${fmtDate(ds)} — solo lectura</div>`;jsw.style.display='none';document.querySelectorAll('#j-mood-scale .mb').forEach(b=>b.classList.add('ro'));['j-q1','j-q2','j-q3','j-q4'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=true;});}
+  if(ro){jrb.style.display='block';jrb.innerHTML=`<div class="ro-banner">📅 Viendo ${fmtDate(ds)} — día futuro</div>`;jsw.style.display='none';document.querySelectorAll('#j-mood-scale .mb').forEach(b=>b.classList.add('ro'));['j-q1','j-q2','j-q3','j-q4'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=true;});}
   else{jrb.style.display='none';jsw.style.display='block';document.querySelectorAll('#j-mood-scale .mb').forEach(b=>b.classList.remove('ro'));['j-q1','j-q2','j-q3','j-q4'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=false;});}
   const e=journalData[ds];
   ['j-q1','j-q2','j-q3','j-q4'].forEach((id,i)=>{const el=document.getElementById(id);const k=i<3?'q'+(i+1):'q4';if(el){el.value=e&&e[k]?e[k]:'';ar(el);}});
@@ -720,9 +719,9 @@ function renderStats(){
 }
 
 function render(){
-  const ds=adate(),ro=!isToday();
+  const ds=adate(),ro=isFuture();
   const rb=document.getElementById('ro-banner');rb.style.display=ro?'block':'none';
-  if(ro)rb.innerHTML=`<div class="ro-banner">📅 Viendo ${fmtDate(ds)} — solo lectura</div>`;
+  if(ro)rb.innerHTML=`<div class="ro-banner">📅 Viendo ${fmtDate(ds)} — día futuro</div>`;
   const list=document.getElementById('habit-list');let html='';
   CATS.forEach(cat=>{
     const group=HABITS.filter(h=>h.cat===cat);
