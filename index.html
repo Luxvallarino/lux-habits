@@ -28,6 +28,7 @@
       };
       firebase.initializeApp(firebaseConfig);
       const db = firebase.firestore();
+      window.__luxDb = db;
       const ref = db.collection("lux_profiles").doc(LUX_PROFILE_ID);
       // Adaptamos la API compat a la misma interfaz que usa el resto del código
       window.__luxDocRef = ref;
@@ -146,22 +147,83 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .add-task-area{padding:10px 16px 12px;display:flex;gap:8px;align-items:center;}
 .add-task-input{flex:1;padding:9px 12px;border-radius:11px;border:1px solid var(--border);background:var(--input-bg);font-size:13px;font-weight:500;color:var(--t1);font-family:'Nunito',sans-serif;transition:border .2s,background .3s;}
 .add-task-input:focus{outline:none;border-color:var(--accent);}
-.add-task-input::placeholder{color:var(--t3);}
+.reencuadre-section{margin:0 18px 10px;}
+.reencuadre-title{font-size:13px;font-weight:700;color:var(--t1);margin-bottom:10px;padding:12px 16px;background:var(--acc-light);border-radius:14px;text-align:center;border-left:3px solid var(--accent);}
+.reencuadre-cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.reencuadre-col{background:var(--card);border-radius:16px;padding:14px;border:1px solid var(--border);box-shadow:var(--shadow-sm);}
+.reencuadre-col-title{font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;text-align:center;}
+.reencuadre-col.alt .reencuadre-col-title{color:var(--accent);}
+.rc-field{margin-bottom:8px;}
+.rc-field label{font-size:11px;font-weight:600;color:var(--t2);display:block;margin-bottom:3px;}
+.rc-field textarea{width:100%;min-height:52px;resize:none;border-radius:9px;border:1px solid var(--border);background:var(--input-bg);padding:7px 9px;font-size:12px;color:var(--t1);font-family:'Nunito',sans-serif;line-height:1.4;transition:border .2s;}
+.rc-field textarea:focus{outline:none;border-color:var(--accent);}
+.rc-shared{background:var(--card);border-radius:16px;padding:14px;border:1px solid var(--border);box-shadow:var(--shadow-sm);margin-bottom:10px;}
+.rc-shared label{font-size:12px;font-weight:600;color:var(--t1);display:block;margin-bottom:6px;}
+.rc-shared textarea{width:100%;min-height:52px;resize:none;border-radius:9px;border:1px solid var(--border);background:var(--input-bg);padding:8px 10px;font-size:13px;color:var(--t1);font-family:'Nunito',sans-serif;line-height:1.5;transition:border .2s;}
+.rc-shared textarea:focus{outline:none;border-color:var(--accent);}
+
+/* ---- Biblioteca ---- */
+.bib-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-top:4px;}
+.bib-header h2{font-size:18px;font-weight:700;color:var(--t1);}
+.bib-add-cat{background:var(--accent);color:#fff;border:none;border-radius:12px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Nunito',sans-serif;}
+.bib-cat{background:var(--card);border-radius:18px;border:1px solid var(--border);margin-bottom:12px;overflow:hidden;box-shadow:var(--shadow-sm);}
+.bib-cat-header{display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;user-select:none;}
+.bib-cat-emoji{font-size:22px;}
+.bib-cat-name{font-size:15px;font-weight:700;color:var(--t1);flex:1;}
+.bib-cat-count{font-size:12px;color:var(--t3);font-weight:500;}
+.bib-cat-arrow{font-size:12px;color:var(--t3);transition:transform .2s;}
+.bib-cat-arrow.open{transform:rotate(180deg);}
+.bib-cat-body{border-top:1px solid var(--sep);padding:12px 16px;}
+.bib-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--sep);}
+.bib-item:last-child{border-bottom:none;}
+.bib-item-icon{font-size:20px;flex-shrink:0;margin-top:2px;}
+.bib-item-info{flex:1;min-width:0;}
+.bib-item-title{font-size:14px;font-weight:600;color:var(--t1);margin-bottom:2px;}
+.bib-item-url{font-size:12px;color:var(--accent);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;}
+.bib-item-note{font-size:12px;color:var(--t2);margin-top:3px;line-height:1.4;}
+.bib-item-del{background:none;border:none;color:var(--t3);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:6px;flex-shrink:0;}
+.bib-item-del:hover{color:#ef4444;background:rgba(239,68,68,0.08);}
+.bib-add-item{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--sep);}
+.bib-add-btn{background:var(--acc-light);color:var(--accent);border:1px dashed var(--accent);border-radius:10px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Nunito',sans-serif;width:100%;}
+.bib-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:999;display:flex;align-items:flex-end;justify-content:center;}
+.bib-modal-box{background:var(--card);border-radius:22px 22px 0 0;padding:24px 20px 32px;width:100%;max-width:500px;box-shadow:0 -4px 30px rgba(0,0,0,0.15);}
+.bib-modal-title{font-size:16px;font-weight:700;color:var(--t1);margin-bottom:16px;}
+.bib-modal input,.bib-modal textarea,.bib-modal select{width:100%;border-radius:10px;border:1px solid var(--border);background:var(--input-bg);padding:10px 12px;font-size:14px;color:var(--t1);font-family:'Nunito',sans-serif;margin-bottom:10px;display:block;}
+.bib-modal input:focus,.bib-modal textarea:focus,.bib-modal select:focus{outline:none;border-color:var(--accent);}
+.bib-modal-btns{display:flex;gap:8px;margin-top:4px;}
+.bib-modal-ok{flex:1;background:var(--accent);color:#fff;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;}
+.bib-modal-cancel{flex:1;background:var(--bg);color:var(--t2);border:1px solid var(--border);border-radius:12px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Nunito',sans-serif;}
+.bib-file-thumb{width:48px;height:48px;border-radius:10px;object-fit:cover;flex-shrink:0;}
+.bib-thumb-placeholder{width:48px;height:48px;border-radius:10px;background:var(--acc-light);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+
+/* ---- Chats IA (Psicólogo / Oráculo) ---- */
+.ia-chat-card{background:var(--card);border-radius:18px;border:1px solid var(--border);margin:0 18px 12px;overflow:hidden;box-shadow:var(--shadow-sm);}
+.ia-chat-header{display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;user-select:none;}
+.ia-chat-emoji{font-size:24px;}
+.ia-chat-title{flex:1;}
+.ia-chat-title h3{font-size:14px;font-weight:700;color:var(--t1);margin:0;}
+.ia-chat-title p{font-size:11px;color:var(--t2);margin:1px 0 0;font-weight:500;}
+.ia-chat-arrow{font-size:11px;color:var(--t3);transition:transform .2s;}
+.ia-chat-arrow.open{transform:rotate(180deg);}
+.ia-chat-body{display:none;border-top:1px solid var(--sep);}
+.ia-chat-body.open{display:block;}
+.ia-chat-msgs{max-height:340px;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
+.ia-msg{max-width:85%;padding:9px 13px;border-radius:14px;font-size:13px;line-height:1.5;}
+.ia-msg.user{align-self:flex-end;background:var(--accent);color:#fff;border-radius:14px 14px 4px 14px;}
+.ia-msg.bot{align-self:flex-start;background:var(--input-bg);color:var(--t1);border-radius:14px 14px 14px 4px;white-space:pre-wrap;}
+.ia-msg.typing{align-self:flex-start;background:var(--input-bg);color:var(--t3);font-style:italic;}
+.ia-chat-input-row{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--sep);}
+.ia-chat-input-row textarea{flex:1;resize:none;min-height:40px;max-height:90px;border-radius:12px;border:1px solid var(--border);background:var(--input-bg);padding:9px 12px;font-size:13px;color:var(--t1);font-family:'Nunito',sans-serif;line-height:1.4;}
+.ia-chat-input-row textarea:focus{outline:none;border-color:var(--accent);}
+.ia-chat-send{background:var(--accent);color:#fff;border:none;border-radius:12px;width:42px;flex-shrink:0;cursor:pointer;font-size:16px;}
+.ia-chat-send:disabled{opacity:0.5;}
+.ia-chat-empty{font-size:12px;color:var(--t3);text-align:center;padding:20px 10px;font-style:italic;}
+.ia-chat-clear{font-size:11px;color:var(--t3);text-align:center;padding:6px 0 0;cursor:pointer;text-decoration:underline;}
 .add-task-btn{width:34px;height:34px;border-radius:10px;background:var(--accent);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;transition:all .15s;flex-shrink:0;}
 .add-task-btn:hover{opacity:.88;transform:translateY(-1px);}
 .task-limit-note{font-size:11px;color:var(--t3);text-align:center;padding:0 16px 10px;font-weight:500;}
 
-.fast-card{background:var(--card);border:1px solid var(--border);border-radius:18px;margin:0 18px 10px;padding:18px;box-shadow:var(--shadow-sm);}
-.fast-timer{font-size:44px;font-weight:300;letter-spacing:-2px;text-align:center;padding:8px 0 4px;color:var(--accent);font-variant-numeric:tabular-nums;}
-.fast-presets{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:10px 0;}
-.fgp{padding:6px 16px;border-radius:10px;border:1px solid var(--border);background:var(--bg);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;color:var(--t1);}
-.fgp:hover{background:var(--acc-hover);color:var(--accent);}
-.fgp.on{background:var(--accent);color:#fff;border-color:transparent;}
-.fast-btns{display:flex;gap:8px;margin-top:8px;}
-.fb{flex:1;padding:11px;border-radius:12px;border:1px solid var(--border);background:var(--bg);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s;color:var(--t1);font-family:'Nunito',sans-serif;}
-.fb.start{background:var(--accent);color:#fff;border-color:transparent;}
-.fb.stop{background:rgba(239,68,68,0.10);color:#ef4444;border-color:rgba(239,68,68,0.25);}
-.fast-status{font-size:12px;font-weight:500;color:var(--t2);text-align:center;margin-top:8px;}
+
 
 .cycle-card{background:var(--card);border:1px solid var(--border);border-radius:18px;margin-bottom:10px;padding:18px;box-shadow:var(--shadow-sm);}
 .cycle-phases{display:flex;gap:4px;margin:12px 0 14px;}
@@ -276,15 +338,20 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
       <div class="ib" onclick="switchTab('notif')">🔔</div>
     </div>
   </div>
+  <div id="quote-header" style="margin:0 18px 10px;background:var(--acc-light);border-radius:14px;padding:12px 16px;text-align:center;">
+    <div id="daily-quote" style="font-size:13px;font-weight:600;color:var(--accent);line-height:1.5;font-style:italic;"></div>
+    <div id="daily-author" style="font-size:11px;color:var(--t2);margin-top:4px;font-weight:500;"></div>
+  </div>
   <div class="date-pill-wrap">
     <span class="date-pill" id="date-pill" onclick="toggleCal()"><span id="pill-txt">Hoy</span><span class="arr">▾</span></span>
     <span class="back-pill" id="back-pill" style="display:none" onclick="goToday()">← Volver a hoy</span>
   </div>
   <div id="cal-dropdown" style="display:none;"></div>
   <div class="tabs">
-    <div class="tab on" onclick="switchTab('hoy')">☀️ Hoy</div>
+    <div class="tab on" onclick="switchTab('hoy')">☀️ Hábitos</div>
     <div class="tab" onclick="switchTab('ciclo')">🌙 Ciclo</div>
     <div class="tab" onclick="switchTab('journal')">📓 Diario</div>
+    <div class="tab" onclick="switchTab('biblioteca')">📚 Biblioteca</div>
     <div class="tab" onclick="switchTab('stats')">📊 Stats</div>
   </div>
 
@@ -331,6 +398,64 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
         <button class="j-save" onclick="saveJournal()">Guardar reflexión de hoy</button>
         <div id="j-fb" style="text-align:center;"></div>
       </div>
+      <div class="reencuadre-section">
+        <div class="reencuadre-title">🔄 Reencuadre cognitivo — ¿Qué pasa si cambio de perspectiva?</div>
+        <div class="rc-shared">
+          <label>📍 Circunstancia — ¿Qué pasó exactamente?</label>
+          <textarea id="rc-hecho" placeholder="Describí el hecho concreto, sin juicio…" oninput="ar(this);saveRC()"></textarea>
+        </div>
+        <div class="reencuadre-cols">
+          <div class="reencuadre-col">
+            <div class="reencuadre-col-title">Perspectiva actual</div>
+            <div class="rc-field"><label>💭 Pensamiento</label><textarea id="rc-p1" placeholder="¿Qué pensás sobre ese hecho?" oninput="ar(this);saveRC()"></textarea></div>
+            <div class="rc-field"><label>💙 Emoción</label><textarea id="rc-e1" placeholder="¿Qué sentís?" oninput="ar(this);saveRC()"></textarea></div>
+            <div class="rc-field"><label>⚡ Acción</label><textarea id="rc-a1" placeholder="¿Qué harías?" oninput="ar(this);saveRC()"></textarea></div>
+            <div class="rc-field"><label>🎯 Resultado</label><textarea id="rc-r1" placeholder="¿A qué te llevaría?" oninput="ar(this);saveRC()"></textarea></div>
+          </div>
+          <div class="reencuadre-col alt">
+            <div class="reencuadre-col-title">Nueva perspectiva</div>
+            <div class="rc-field"><label>💭 Pensamiento</label><textarea id="rc-p2" placeholder="¿Y si lo vieras diferente?" oninput="ar(this);saveRC()"></textarea></div>
+            <div class="rc-field"><label>💙 Emoción</label><textarea id="rc-e2" placeholder="¿Qué sentirías?" oninput="ar(this);saveRC()"></textarea></div>
+            <div class="rc-field"><label>⚡ Acción</label><textarea id="rc-a2" placeholder="¿Qué harías entonces?" oninput="ar(this);saveRC()"></textarea></div>
+            <div class="rc-field"><label>🎯 Resultado</label><textarea id="rc-r2" placeholder="¿A qué te llevaría?" oninput="ar(this);saveRC()"></textarea></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Psicólogo -->
+      <div class="ia-chat-card">
+        <div class="ia-chat-header" onclick="toggleIAChat('psi')">
+          <span class="ia-chat-emoji">🧠</span>
+          <div class="ia-chat-title"><h3>Espacio de escucha</h3><p id="ia-sub-psi">Para pensar en voz alta, con marcos psicológicos reales</p></div>
+          <span class="ia-chat-arrow" id="ia-arrow-psi">▼</span>
+        </div>
+        <div class="ia-chat-body" id="ia-body-psi">
+          <div class="ia-chat-msgs" id="ia-msgs-psi"></div>
+          <div class="ia-chat-input-row">
+            <textarea id="ia-input-psi" placeholder="Escribí lo que estás pensando o sintiendo…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendIAMsg('psi');}"></textarea>
+            <button class="ia-chat-send" id="ia-send-psi" onclick="sendIAMsg('psi')">➤</button>
+          </div>
+          <div class="ia-chat-clear" onclick="clearIAChat('psi')">Borrar conversación</div>
+        </div>
+      </div>
+
+      <!-- Chat Oráculo -->
+      <div class="ia-chat-card">
+        <div class="ia-chat-header" onclick="toggleIAChat('ora')">
+          <span class="ia-chat-emoji">🔮</span>
+          <div class="ia-chat-title"><h3>Oráculo</h3><p id="ia-sub-ora">Según tu carta natal y los tránsitos de hoy</p></div>
+          <span class="ia-chat-arrow" id="ia-arrow-ora">▼</span>
+        </div>
+        <div class="ia-chat-body" id="ia-body-ora">
+          <div class="ia-chat-msgs" id="ia-msgs-ora"></div>
+          <div class="ia-chat-input-row">
+            <textarea id="ia-input-ora" placeholder="¿Qué querés consultar?" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendIAMsg('ora');}"></textarea>
+            <button class="ia-chat-send" id="ia-send-ora" onclick="sendIAMsg('ora')">➤</button>
+          </div>
+          <div class="ia-chat-clear" onclick="clearIAChat('ora')">Borrar conversación</div>
+        </div>
+      </div>
+
       <div class="ai-card">
         <h3>✦ Análisis con IA</h3>
         <div class="ai-sub">Reflexiones de esta semana o este mes</div>
@@ -343,10 +468,6 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
           <span style="font-size:12px;color:var(--t3);font-weight:500;" id="ai-info"></span>
         </div>
         <div id="ai-result" class="ai-result empty">El análisis aparecerá acá…</div>
-      </div>
-      <div class="quote-card">
-        <div class="quote-text" id="daily-quote"></div>
-        <div class="quote-author" id="daily-author"></div>
       </div>
       <div style="height:8px;"></div>
     </div>
@@ -363,20 +484,25 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
     </div>
   </div>
 
+  <div id="v-biblioteca" class="view">
+    <div style="padding:0 18px 18px;" id="biblioteca-content"></div>
+  </div>
+
   <div id="v-notif" class="view"><div style="padding:0 18px;" id="notif-content"></div></div>
 </div>
 
 <script>
 const HABITS=[
   {id:1,cat:'🌅 Mañana',name:'Movilidad al despertar',emoji:'🤸',color:'#f59e0b',type:'check'},
+  {id:13,cat:'🌅 Mañana',name:'Masaje linfático con aceite',emoji:'🫧',color:'#a78bfa',type:'check'},
   {id:2,cat:'🌅 Mañana',name:'Jugo detox',emoji:'🥬',color:'#16a34a',type:'check'},
   {id:3,cat:'🌅 Mañana',name:'Electrolitos',emoji:'⚡',color:'#0ea5e9',type:'check'},
   {id:4,cat:'🌅 Mañana',name:'Creatina',emoji:'💪',color:'#7c3aed',type:'check'},
-  {id:5,cat:'🌅 Mañana',name:'Suplementos',emoji:'💊',color:'#d946ef',type:'check',sub:'Magnesio · Ashwagandha · Colágeno · Vit D'},
+  {id:22,cat:'🌅 Mañana',name:'Afirmaciones',emoji:'🌟',color:'#f59e0b',type:'check'},
   {id:6,cat:'💧 Nutrición',name:'Agua',emoji:'💧',color:'#3b82f6',type:'qty',target:2500,unit:'ml',step:250},
   {id:18,cat:'💧 Nutrición',name:'Alimentación saludable',emoji:'🥗',color:'#16a34a',type:'check',sub:'Marcá si comiste limpio hoy'},
-  {id:7,cat:'🏋️ Movimiento',name:'Entrenamiento de fuerza',emoji:'🏋️',color:'#ef4444',type:'qty',target:60,unit:'min',step:5,note:'L/M/V'},
-  {id:19,cat:'🏋️ Movimiento',name:'Caminata',emoji:'🚶',color:'#f97316',type:'qty',target:60,unit:'min',step:5,note:'M/J'},
+  {id:7,cat:'🏋️ Movimiento',name:'Entrenamiento de fuerza',emoji:'🏋️',color:'#ef4444',type:'qty',target:60,unit:'min',step:5},
+  {id:19,cat:'🏋️ Movimiento',name:'Caminata',emoji:'🚶',color:'#f97316',type:'qty',target:60,unit:'min',step:5},
   {id:20,cat:'🏋️ Movimiento',name:'Rollers / Bici',emoji:'🛼',color:'#06b6d4',type:'qty',target:60,unit:'min',step:5},
   {id:8,cat:'🧘 Bienestar',name:'Respiración consciente',emoji:'🫁',color:'#06b6d4',type:'qty',target:5,unit:'min',step:1},
   {id:9,cat:'📖 Mente',name:'Journaling',emoji:'✍️',color:'#f97316',type:'check'},
@@ -384,34 +510,40 @@ const HABITS=[
   {id:11,cat:'📖 Mente',name:'Estudio / búsqueda laboral',emoji:'💼',color:'#6366f1',type:'qty',target:60,unit:'min',step:5},
   {id:12,cat:'🌙 Noche',name:'Skincare nocturno',emoji:'🧴',color:'#ec4899',type:'check'},
   {id:21,cat:'🌙 Noche',name:'Yoga facial',emoji:'✨',color:'#f472b6',type:'check'},
-  {id:13,cat:'🌙 Noche',name:'Masaje linfático con aceite',emoji:'🫧',color:'#a78bfa',type:'check'},
   {id:14,cat:'🌙 Noche',name:'Botas de drenaje',emoji:'🥾',color:'#64748b',type:'check'},
+  {id:5,cat:'🌙 Noche',name:'Suplementos',emoji:'💊',color:'#d946ef',type:'check',sub:'Magnesio · Ashwagandha · Colágeno · Vit D'},
+  {id:23,cat:'🌙 Noche',name:'Afirmaciones',emoji:'🌟',color:'#f59e0b',type:'check'},
   {id:15,cat:'🚫 Límites',name:'Sin alcohol',emoji:'🍷',color:'#b91c1c',type:'avoid'},
   {id:16,cat:'🚫 Límites',name:'Sin ultra procesados',emoji:'🚫',color:'#78350f',type:'avoid'},
+  {id:17,cat:'🚫 Límites',name:'Contacto cero',emoji:'🔕',color:'#6b7280',type:'avoid'},
   {id:99,cat:'⚡ Productividad',name:'Pendientes del día completados',emoji:'✅',color:'#7c6ee6',type:'auto'},
 ];
 const CATS=[...new Set(HABITS.map(h=>h.cat))];
 const MM={1:{emoji:'😞',color:'#ef4444',bg:'#fef2f2',label:'Muy abajo'},2:{emoji:'😕',color:'#f97316',bg:'#fff7ed',label:'Bajo'},3:{emoji:'😐',color:'#eab308',bg:'#fefce8',label:'Neutral'},4:{emoji:'🙂',color:'#22c55e',bg:'#f0fdf4',label:'Bien'},5:{emoji:'😄',color:'#7c6ee6',bg:'#eeeafd',label:'Muy arriba'}};
 const PRESETS=[12,14,16,18,20];
 const CYCLE_PHASES=[
-  {name:'Menstrual',days:[1,5],emoji:'🌑',color:'#b91c1c',tip:'Fase de descanso. Priorizá sueño, hidratación y movimiento suave.'},
-  {name:'Folicular',days:[6,13],emoji:'🌒',color:'#f59e0b',tip:'Energía en aumento. Ideal para proyectos, socializar y ejercicio intenso.'},
-  {name:'Ovulación',days:[14,17],emoji:'🌕',color:'#22c55e',tip:'Pico de energía y claridad. Ideal para conversaciones importantes y cardio fuerte.'},
-  {name:'Lútea',days:[18,28],emoji:'🌘',color:'#8b5cf6',tip:'Energía bajando. Priorizá rutinas tranquilas, journaling y autocuidado.'},
+  {name:'Menstrual',days:[1,5],emoji:'🍂',color:'#b91c1c',tip:'Fase de descanso. Priorizá sueño, hidratación y movimiento suave.',
+    suggestions:['Estiramientos suaves o yoga restaurativo','Baño caliente con sales de magnesio','Journaling de lo que necesitás soltar','Caminata corta al aire libre, sin presión','Té de jengibre o manzanilla','Permitite bajar el ritmo sin culpa']},
+  {name:'Folicular',days:[6,13],emoji:'🌱',color:'#f59e0b',tip:'Energía en aumento. Ideal para proyectos, socializar y ejercicio intenso.',
+    suggestions:['Arrancar un proyecto nuevo o retomar uno pendiente','Entrenamiento de fuerza o cardio intenso','Planificar la semana o el mes','Socializar, llamar a alguien que hace tiempo no ves','Probar una receta nueva y nutritiva','Organizar espacios físicos (placard, escritorio)']},
+  {name:'Ovulación',days:[14,17],emoji:'🌸',color:'#22c55e',tip:'Pico de energía y claridad. Ideal para conversaciones importantes y cardio fuerte.',
+    suggestions:['Tener esa conversación importante que vinis postergando','Presentaciones, entrevistas o negociaciones','Entrenamiento de alta intensidad','Actividades sociales y en grupo','Tomar decisiones grandes con más claridad mental','Salir, mostrarte, brillar']},
+  {name:'Lútea',days:[18,28],emoji:'🍁',color:'#8b5cf6',tip:'Energía bajando. Priorizá rutinas tranquilas, journaling y autocuidado.',
+    suggestions:['Tareas de detalle y organización (no de inicio)','Journaling sobre patrones emocionales del mes','Reducir estímulos: menos pantallas, más calma','Cocinar algo reconfortante con anticipación','Decir no a compromisos que no son prioridad','Mimarte: skincare, lectura, dormir temprano']},
 ];
 const QUOTES=[
-  {text:"No tenés que ser perfecta todos los días. Solo tenés que aparecer.",author:"— Para vos"},
+  {text:"No tenés que ser perfecta todos los días. Solo tenés que aparecer.",author:""},
   {text:"El cuidado propio no es egoísmo. Es la base desde donde todo lo demás crece.",author:"— Audre Lorde"},
-  {text:"Pequeños pasos consistentes construyen vidas extraordinarias.",author:"— Para vos"},
-  {text:"Merecés la misma compasión que le darías a alguien que amás.",author:"— Para vos"},
-  {text:"Hoy es suficiente. Vos sos suficiente.",author:"— Para vos"},
-  {text:"La disciplina es una forma de amor propio.",author:"— Para vos"},
-  {text:"Cada hábito que construís es una promesa que te cumplís a vos misma.",author:"— Para vos"},
-  {text:"El descanso es productivo. La calma es poderosa.",author:"— Para vos"},
+  {text:"Pequeños pasos consistentes construyen vidas extraordinarias.",author:""},
+  {text:"Merecés la misma compasión que le darías a alguien que amás.",author:""},
+  {text:"Hoy es suficiente. Vos sos suficiente.",author:""},
+  {text:"La disciplina es una forma de amor propio.",author:""},
+  {text:"Cada hábito que construís es una promesa que te cumplís a vos misma.",author:""},
+  {text:"El descanso es productivo. La calma es poderosa.",author:""},
   {text:"Sos más valiente de lo que creés, más fuerte de lo que parecés.",author:"— A.A. Milne"},
-  {text:"La constancia late más fuerte que la intensidad.",author:"— Para vos"},
-  {text:"Tu bienestar importa. Priorizarlo no necesita justificación.",author:"— Para vos"},
-  {text:"Cada mañana que empezás tu rutina es una victoria.",author:"— Para vos"},
+  {text:"La constancia late más fuerte que la intensidad.",author:""},
+  {text:"Tu bienestar importa. Priorizarlo no necesita justificación.",author:""},
+  {text:"Cada mañana que empezás tu rutina es una victoria.",author:""},
 ];
 const DEFAULT_NOTIFS=[
   {id:'sup',emoji:'💊',label:'Suplementos',time:'08:00',on:true,deletable:false},
@@ -560,7 +692,24 @@ function gv(id,d){return vals[kf(id,d)]||0;}
 function sv(id,v){vals[kf(id)]=Math.max(0,v);}
 function pz(n){return String(n).padStart(2,'0');}
 function ar(el){el.style.height='auto';el.style.height=el.scrollHeight+'px';}
-function toggleDark(){dark=1-dark;document.getElementById('app').dataset.dark=dark;save();}
+function getMoonPhase(dateStr){
+  // Cálculo astronómico de fase lunar basado en ciclo sinódico (29.53059 días)
+  // Referencia: luna nueva el 6 de enero de 2000 a las 18:14 UTC
+  const known=new Date('2000-01-06T18:14:00Z');
+  const d=new Date(dateStr+'T12:00:00Z');
+  const diff=(d-known)/864e5;
+  const cycle=29.53059;
+  const phase=((diff%cycle)+cycle)%cycle;
+  // Rangos centrados simétricamente alrededor de luna llena (día 14.765)
+  if(phase<1.85||phase>=27.68)return'🌑'; // luna nueva
+  if(phase<7.38)return'🌒';  // creciente
+  if(phase<11.15)return'🌓'; // cuarto creciente
+  if(phase<14.07)return'🌔'; // gibosa creciente
+  if(phase<15.46)return'🌕'; // luna llena
+  if(phase<18.38)return'🌖'; // gibosa menguante
+  if(phase<22.15)return'🌗'; // cuarto menguante
+  return'🌘'; // menguante
+}
 function fmtDate(ds){const d=new Date(ds+'T12:00:00');return d.toLocaleDateString('es-UY',{weekday:'long',day:'numeric',month:'long'});}
 function calcStreak(h){let s=0;for(let i=0;i<90;i++){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().slice(0,10);if(isDone(h,ds))s++;else if(i>0)break;}return s;}
 function getCycleDay(){if(!cycleData.lastPeriod)return null;const diff=Math.floor((new Date()-new Date(cycleData.lastPeriod+'T12:00:00'))/864e5)+1;return((diff-1)%cycleData.cycleLen)+1;}
@@ -596,7 +745,7 @@ function renderCal(){
   const rem=cells.length%7===0?0:7-cells.length%7;
   for(let i=1;i<=rem;i++){const d=new Date(calY,calM+1,i);cells.push({ds:d.toISOString().slice(0,10),n:i,om:true});}
   let wks='';
-  for(let w=0;w<cells.length/7;w++){wks+='<div class="cal-week">';for(let d=0;d<7;d++){const c=cells[w*7+d];const iT=c.ds===today,iS=c.ds===(viewDate||today),iF=c.ds>today;const hd=hasData(c.ds)&&!c.om;const mc=(moodData[c.ds]&&moodData[c.ds].level)?MM[moodData[c.ds].level].color:null;let ph='';if(!c.om&&!iF&&cycleData.lastPeriod){const lp=new Date(cycleData.lastPeriod+'T12:00:00');const cd=new Date(c.ds+'T12:00:00');const diff=Math.floor((cd-lp)/864e5);const dn=((diff%cycleData.cycleLen)+cycleData.cycleLen)%cycleData.cycleLen+1;const p=getCyclePhase(dn);if(p)ph=`<span class="cal-phase">${p.emoji}</span>`;}let cls='cal-cell';if(c.om)cls+=' other-m';if(iT)cls+=' is-today';if(iS&&!iT)cls+=' is-sel';if(iF)cls+=' future';const dot=hd?`<div class="cal-dot" style="background:${mc||'var(--green)'};"></div>`:'';wks+=`<div class="${cls}" onclick="selDate('${c.ds}')">${ph}${c.n}${dot}</div>`;}wks+='</div>';}
+  for(let w=0;w<cells.length/7;w++){wks+='<div class="cal-week">';for(let d=0;d<7;d++){const c=cells[w*7+d];const iT=c.ds===today,iS=c.ds===(viewDate||today),iF=c.ds>today;const hd=hasData(c.ds)&&!c.om;const mc=(moodData[c.ds]&&moodData[c.ds].level)?MM[moodData[c.ds].level].color:null;let ph='';if(!c.om){ph=`<span class="cal-phase">${getMoonPhase(c.ds)}</span>`;}let cls='cal-cell';if(c.om)cls+=' other-m';if(iT)cls+=' is-today';if(iS&&!iT)cls+=' is-sel';if(iF)cls+=' future';const dot=hd?`<div class="cal-dot" style="background:${mc||'var(--green)'};"></div>`:'';wks+=`<div class="${cls}" onclick="selDate('${c.ds}')">${ph}${c.n}${dot}</div>`;}wks+='</div>';}
   dd.innerHTML=`<div class="cal-dropdown"><div class="cal-nav"><button class="cal-btn" onclick="calNav(-1)">‹</button><span class="cal-month-lbl">${mN[calM]} ${calY}</span><button class="cal-btn" onclick="calNav(1)">›</button></div><div class="cal-grid"><div class="cal-dlbls">${dN.map(d=>`<div class="cal-dlbl">${d}</div>`).join('')}</div><div class="cal-weeks">${wks}</div></div></div>`;
   dd.style.display='block';
 }
@@ -645,7 +794,9 @@ function fastCard(ro){
 
 function selMood(m){if(isFuture())return;curMood=m;const meta=MM[m];document.querySelectorAll('#j-mood-scale .mb').forEach(b=>{const match=parseInt(b.dataset.m)===m;b.classList.toggle('sel',match);if(match){b.style.setProperty('--sc',b.dataset.c);b.style.setProperty('--sbg',b.dataset.bg);}});const t=document.getElementById('mood-txt');if(t){t.textContent=meta.emoji+' '+meta.label;t.style.color=meta.color;}moodData[adate()]={...(moodData[adate()]||{}),level:m};const mh=document.getElementById('s-mood-h');if(mh)mh.textContent=meta.emoji;}
 
-function saveJournal(){if(isFuture())return;const ds=adate();const q1=document.getElementById('j-q1').value.trim(),q2=document.getElementById('j-q2').value.trim(),q3=document.getElementById('j-q3').value.trim(),q4=document.getElementById('j-q4').value.trim();journalData[ds]={mood:curMood,q1,q2,q3,q4,ts:Date.now()};if(curMood)moodData[ds]={...(moodData[ds]||{}),level:curMood};sv(9,1);render();save();const fb=document.getElementById('j-fb');fb.innerHTML='<span class="saved-badge">✓ Reflexión guardada</span>';setTimeout(()=>{fb.innerHTML='';},3000);}
+function saveRC(){if(isFuture())return;const ds=adate();const rc={hecho:document.getElementById('rc-hecho')?.value||'',p1:document.getElementById('rc-p1')?.value||'',e1:document.getElementById('rc-e1')?.value||'',a1:document.getElementById('rc-a1')?.value||'',r1:document.getElementById('rc-r1')?.value||'',p2:document.getElementById('rc-p2')?.value||'',e2:document.getElementById('rc-e2')?.value||'',a2:document.getElementById('rc-a2')?.value||'',r2:document.getElementById('rc-r2')?.value||''};journalData[ds]={...(journalData[ds]||{}),rc};save();}
+function loadRC(ds){const rc=(journalData[ds]||{}).rc||{};['hecho','p1','e1','a1','r1','p2','e2','a2','r2'].forEach(k=>{const el=document.getElementById('rc-'+k);if(el){el.value=rc[k]||'';ar(el);}});}
+function saveJournal(){if(isFuture())return;const ds=adate();const q1=document.getElementById('j-q1').value.trim(),q2=document.getElementById('j-q2').value.trim(),q3=document.getElementById('j-q3').value.trim(),q4=document.getElementById('j-q4').value.trim();journalData[ds]={...(journalData[ds]||{}),mood:curMood,q1,q2,q3,q4,ts:Date.now()};if(curMood)moodData[ds]={...(moodData[ds]||{}),level:curMood};sv(9,1);render();save();const fb=document.getElementById('j-fb');fb.innerHTML='<span class="saved-badge">✓ Reflexión guardada</span>';setTimeout(()=>{fb.innerHTML='';},3000);}
 
 function renderJournal(){
   const ds=adate(),ro=isFuture();
@@ -654,11 +805,13 @@ function renderJournal(){
   else{jrb.style.display='none';jsw.style.display='block';document.querySelectorAll('#j-mood-scale .mb').forEach(b=>b.classList.remove('ro'));['j-q1','j-q2','j-q3','j-q4'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=false;});}
   const e=journalData[ds];
   ['j-q1','j-q2','j-q3','j-q4'].forEach((id,i)=>{const el=document.getElementById(id);const k=i<3?'q'+(i+1):'q4';if(el){el.value=e&&e[k]?e[k]:'';ar(el);}});
+  loadRC(ds);
   document.querySelectorAll('#j-mood-scale .mb').forEach(b=>b.classList.remove('sel'));
   const mt=document.getElementById('mood-txt');if(mt){mt.textContent='Tocá cómo te sentís hoy';mt.style.color='var(--t3)';}
   const sm=moodData[ds];if(sm&&sm.level){const meta=MM[sm.level];document.querySelectorAll('#j-mood-scale .mb').forEach(b=>{const match=parseInt(b.dataset.m)===sm.level;b.classList.toggle('sel',match);if(match){b.style.setProperty('--sc',b.dataset.c);b.style.setProperty('--sbg',b.dataset.bg);}});if(mt){mt.textContent=meta.emoji+' '+meta.label;mt.style.color=meta.color;}if(!ro)curMood=sm.level;}
   const entries=getEntries(aiTab==='week'?7:30);const info=document.getElementById('ai-info');if(info)info.textContent=entries.length+' entrada'+(entries.length!==1?'s':'')+(aiTab==='week'?' esta semana':' este mes');
-  const doy=Math.floor((new Date()-new Date(new Date().getFullYear(),0,0))/864e5);const q=QUOTES[doy%QUOTES.length];const qt=document.getElementById('daily-quote'),qa=document.getElementById('daily-author');if(qt)qt.textContent='"'+q.text+'"';if(qa)qa.textContent=q.author;
+  const doy=Math.floor((new Date()-new Date(new Date().getFullYear(),0,0))/864e5);const q=QUOTES[doy%QUOTES.length];const qt=document.getElementById('daily-quote'),qa=document.getElementById('daily-author');if(qt)qt.textContent='"'+q.text+'"';if(qa)qa.textContent=q.author?q.author:'';
+  renderIAChat('psi');renderIAChat('ora');
 }
 function setAiTab(t){aiTab=t;document.getElementById('ai-tab-w').classList.toggle('on',t==='week');document.getElementById('ai-tab-m').classList.toggle('on',t==='month');renderJournal();}
 function getEntries(days){const e=[];for(let i=days-1;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().slice(0,10);const en=journalData[ds];if(en&&(en.q1||en.q2||en.q3||en.q4))e.push({date:ds,name:['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][d.getDay()],entry:en});}return e;}
@@ -682,9 +835,10 @@ function renderCiclo(){
   if(cDay){const rem=cycleData.cycleLen-cDay+1;daysUntil=rem<=0?'Hoy':rem+' días';}
   const pBars=CYCLE_PHASES.map(p=>{const a=phase&&phase.name===p.name;const w=Math.round((p.days[1]-p.days[0]+1)/cycleData.cycleLen*100);return`<div class="cp" style="background:${p.color};opacity:${a?1:0.2};flex:${w};${a?'box-shadow:0 0 10px '+p.color+'60;':''}"></div>`;}).join('');
   document.getElementById('ciclo-content').innerHTML=`<div style="height:4px;"></div>
-  <div class="cycle-card"><div style="display:flex;align-items:center;gap:11px;margin-bottom:4px;"><div class="hico" style="background:${phase?phase.color+'20':'var(--sep)'};">${phase?phase.emoji:'🌑'}</div><div><div style="font-size:18px;font-weight:700;color:var(--accent);">${phase?phase.name:'Sin datos'}</div><div style="font-size:12px;color:var(--t2);font-weight:500;">${cDay?'Día '+cDay+' de '+cycleData.cycleLen:'Registrá tu último período'}</div></div></div>
+  <div class="cycle-card"><div style="display:flex;align-items:center;gap:11px;margin-bottom:4px;"><div class="hico" style="background:${phase?phase.color+'20':'var(--sep)'};">${phase?phase.emoji:'🍂'}</div><div><div style="font-size:18px;font-weight:700;color:var(--accent);">${phase?phase.name:'Sin datos'}</div><div style="font-size:12px;color:var(--t2);font-weight:500;">${cDay?'Día '+cDay+' de '+cycleData.cycleLen:'Registrá tu último período'}</div></div></div>
   <div class="cycle-phases">${pBars}</div>${phase?`<div class="cycle-phase-info"><span class="cp-icon">${phase.emoji}</span><div class="cp-text"><h4>${phase.name}</h4><p>${phase.tip}</p></div></div>`:''}
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;"><div style="background:var(--sep);border-radius:13px;padding:13px;text-align:center;"><div style="font-size:22px;font-weight:700;color:var(--accent);">${cDay||'—'}</div><div style="font-size:11px;color:var(--t2);font-weight:500;">Día del ciclo</div></div><div style="background:var(--sep);border-radius:13px;padding:13px;text-align:center;"><div style="font-size:16px;font-weight:700;color:var(--rose);">${daysUntil}</div><div style="font-size:11px;color:var(--t2);font-weight:500;">Próximo período</div></div></div></div>
+  ${phase?`<div class="cycle-card"><div style="font-size:14px;font-weight:700;color:var(--t1);margin-bottom:4px;display:flex;align-items:center;gap:8px;">${phase.emoji} Sugerencias para hoy</div><div style="font-size:12px;color:var(--t2);margin-bottom:12px;font-weight:500;">Pensadas para tu energía en fase ${phase.name.toLowerCase()}</div>${phase.suggestions.map(s=>`<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--sep);"><span style="color:${phase.color};font-size:14px;line-height:1.4;">●</span><span style="font-size:13px;color:var(--t1);line-height:1.4;">${s}</span></div>`).join('')}</div>`:''}
   <div class="cycle-card"><div style="font-size:14px;font-weight:700;margin-bottom:13px;color:var(--t1);">📅 Registrar período</div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-size:13px;color:var(--t2);font-weight:500;flex:1;">Fecha inicio:</span><input type="date" id="period-date" class="cdr-input" value="${lp||''}" max="${tds()}"><button class="cdr-btn" onclick="savePeriod()">Guardar</button></div><div class="cycle-notif">💡 <strong>Siguiente período estimado:</strong> ${nextPeriod}<br>Ciclo: ${cycleData.cycleLen} días · <span style="cursor:pointer;color:var(--accent);font-weight:700;" onclick="changeCycleLen()">Cambiar duración</span></div></div>
   <div class="cycle-card"><div style="font-size:14px;font-weight:700;color:var(--t1);margin-bottom:12px;">Guía de fases</div>${CYCLE_PHASES.map(p=>`<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--sep);"><div style="width:36px;height:36px;border-radius:10px;background:${p.color}20;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">${p.emoji}</div><div><div style="font-size:13px;font-weight:600;">Días ${p.days[0]}–${p.days[1]}: ${p.name}</div><div style="font-size:12px;color:var(--t2);margin-top:2px;font-weight:400;">${p.tip}</div></div></div>`).join('')}</div><div style="height:8px;"></div>`;
 }
@@ -703,7 +857,29 @@ function togN(i){notifList[i].on=!notifList[i].on;save();renderNotif();schedNoti
 function delN(i){notifList.splice(i,1);save();renderNotif();}
 function addN(){notifList.push({id:'c_'+Date.now(),emoji:'🔔',label:'Nuevo recordatorio',time:'09:00',on:true,deletable:true});save();renderNotif();}
 async function reqPerm(){if(!('Notification'in window)){document.getElementById('notif-status').textContent='No soportado.';return;}const p=await Notification.requestPermission();const el=document.getElementById('notif-status');if(p==='granted'){el.textContent='✓ Activadas.';el.style.color='var(--green)';schedNotifs();}else{el.textContent='Permiso denegado.';el.style.color='#ef4444';}}
-function schedNotifs(){if(!('Notification'in window)||Notification.permission!=='granted')return;notifList.filter(n=>n.on).forEach(n=>{function sA(){const[h,m]=n.time.split(':').map(Number);const t=new Date();t.setHours(h,m,0,0);if(t<=new Date())t.setDate(t.getDate()+1);setTimeout(()=>{new Notification(n.emoji+' '+n.label+', Lux',{body:'Recordatorio de tu rutina'});sA();},t-new Date());}sA();});}
+function schedNotifs(){
+  if(!('Notification'in window)||Notification.permission!=='granted')return;
+  // Cancela el intervalo anterior si existe
+  if(window.__notifInterval)clearInterval(window.__notifInterval);
+  // Chequea cada minuto si hay alguna notificación para disparar
+  window.__notifInterval=setInterval(()=>{
+    const now=new Date();
+    const hh=String(now.getHours()).padStart(2,'0');
+    const mm=String(now.getMinutes()).padStart(2,'0');
+    const current=hh+':'+mm;
+    notifList.filter(n=>n.on&&n.time===current).forEach(n=>{
+      new Notification(n.emoji+' '+n.label,{body:'Recordatorio de tu rutina · Lux',icon:'https://luxvallarino.github.io/lux-habits/icon.svg'});
+    });
+  },60000);
+  // También dispara inmediatamente si alguna notif es en el minuto actual
+  const now=new Date();
+  const hh=String(now.getHours()).padStart(2,'0');
+  const mm=String(now.getMinutes()).padStart(2,'0');
+  const current=hh+':'+mm;
+  notifList.filter(n=>n.on&&n.time===current).forEach(n=>{
+    new Notification(n.emoji+' '+n.label,{body:'Recordatorio de tu rutina · Lux',icon:'https://luxvallarino.github.io/lux-habits/icon.svg'});
+  });
+}
 
 function renderStats(){
   const days=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
@@ -727,7 +903,6 @@ function render(){
     const group=HABITS.filter(h=>h.cat===cat);
     if(cat==='⚡ Productividad')html+=renderPendientesCard(ds,ro);
     html+=`<div class="cat-title">${cat}</div>`;
-    if(cat==='💧 Nutrición')html+=fastCard(ro);
     const rg=group.filter(h=>h.type!=='fast');if(!rg.length)return;
     html+=`<div class="hcard">`;
     rg.forEach((h,gi)=>{
@@ -760,11 +935,315 @@ function render(){
 function toggle(id){if(isFuture())return;sv(id,gv(id)>=1?0:1);render();save();}
 function chg(id,delta){if(isFuture())return;sv(id,gv(id)+delta);render();save();}
 function switchTab(t){
-  ['hoy','ciclo','journal','stats','notif'].forEach(n=>document.getElementById('v-'+n).classList.toggle('on',n===t));
-  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('on',['hoy','ciclo','journal','stats'][i]===t));
-  if(t==='stats')renderStats();if(t==='journal')renderJournal();if(t==='ciclo')renderCiclo();if(t==='notif')renderNotif();
+  ['hoy','ciclo','journal','stats','notif','biblioteca'].forEach(n=>document.getElementById('v-'+n).classList.toggle('on',n===t));
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('on',['hoy','ciclo','journal','biblioteca','stats'][i]===t));
+  if(t==='stats')renderStats();if(t==='journal')renderJournal();if(t==='ciclo')renderCiclo();if(t==='notif')renderNotif();if(t==='biblioteca')renderBiblioteca();
 }
-async function init(){await load();document.getElementById('app').dataset.dark=dark;updateDateUI();render();renderJournal();schedNotifs();_initDebugPanel();}
+// ============================================================
+// BIBLIOTECA
+// ============================================================
+let bibData = [
+  {id:'bib-mov', emoji:'🤸', name:'Movilidad', open:false, items:[]},
+  {id:'bib-mas', emoji:'🫧', name:'Masajes', open:false, items:[]},
+  {id:'bib-yoga', emoji:'✨', name:'Yoga facial', open:false, items:[]},
+  {id:'bib-bienestar', emoji:'🧘', name:'Bienestar', open:false, items:[]},
+];
+
+function saveBib(){
+  ssLocal('lux_bib',bibData);
+  if(window.__luxFirebaseReady&&window.__luxDb){
+    const ref=window.__luxDb.collection('lux_profiles').doc('lux-principal-biblioteca');
+    ref.set({data:JSON.stringify(bibData),_updatedAt:Date.now()}).catch(e=>console.error('Bib save error',e));
+  }
+}
+async function loadBib(){
+  const local=sgLocal('lux_bib');if(local&&local.length)bibData=local;
+  if(window.__luxReadyPromise)await window.__luxReadyPromise;
+  if(window.__luxFirebaseReady&&window.__luxDb){
+    try{
+      const ref=window.__luxDb.collection('lux_profiles').doc('lux-principal-biblioteca');
+      const snap=await ref.get();
+      if(snap.exists&&snap.data().data){
+        const d=JSON.parse(snap.data().data);
+        if(d&&d.length){bibData=d;ssLocal('lux_bib',bibData);}
+      }
+    }catch(e){console.error('Bib load error',e);}
+  }
+}
+
+function getItemIcon(type,url){
+  if(type==='link'){
+    if(url&&(url.includes('youtube')||url.includes('youtu.be')))return'▶️';
+    if(url&&url.includes('instagram'))return'📸';
+    return'🔗';
+  }
+  if(type==='file')return'📄';
+  return'📌';
+}
+
+function getYTThumb(url){
+  const m=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
+  return m?`https://img.youtube.com/vi/${m[1]}/mqdefault.jpg`:null;
+}
+
+function renderBiblioteca(){
+  const el=document.getElementById('biblioteca-content');if(!el)return;
+  let html=`<div class="bib-header"><h2>📚 Biblioteca</h2><button class="bib-add-cat" onclick="openAddCat()">+ Categoría</button></div>`;
+  bibData.forEach((cat,ci)=>{
+    const count=cat.items.length;
+    html+=`<div class="bib-cat">
+      <div class="bib-cat-header" onclick="toggleBibCat(${ci})">
+        <span class="bib-cat-emoji">${cat.emoji}</span>
+        <span class="bib-cat-name">${cat.name}</span>
+        <span class="bib-cat-count">${count} item${count!==1?'s':''}</span>
+        <span class="bib-cat-arrow${cat.open?' open':''}">▼</span>
+      </div>`;
+    if(cat.open){
+      html+=`<div class="bib-cat-body">`;
+      cat.items.forEach((item,ii)=>{
+        const icon=getItemIcon(item.type,item.url);
+        const thumb=item.type==='link'&&item.url?getYTThumb(item.url):null;
+        html+=`<div class="bib-item">
+          ${thumb?`<img class="bib-file-thumb" src="${thumb}" onerror="this.style.display='none'">`:`<div class="bib-thumb-placeholder">${icon}</div>`}
+          <div class="bib-item-info">
+            <div class="bib-item-title">${item.title}</div>
+            ${item.url?`<a class="bib-item-url" href="${item.url}" target="_blank">${item.url.length>40?item.url.slice(0,40)+'…':item.url}</a>`:''}
+            ${item.note?`<div class="bib-item-note">${item.note}</div>`:''}
+            ${item.type==='file'&&item.data?`<a href="${item.data}" download="${item.title}" style="font-size:12px;color:var(--accent);font-weight:600;">⬇ Descargar</a>`:''}
+          </div>
+          <button class="bib-item-del" onclick="delBibItem(${ci},${ii})">✕</button>
+        </div>`;
+      });
+      html+=`<div class="bib-add-item"><button class="bib-add-btn" onclick="openAddItem(${ci})">+ Agregar referencia</button></div>`;
+      html+=`</div>`;
+    }
+    html+=`</div>`;
+  });
+  el.innerHTML=html;
+}
+
+function toggleBibCat(ci){bibData[ci].open=!bibData[ci].open;renderBiblioteca();}
+
+function delBibItem(ci,ii){if(!confirm('¿Eliminar esta referencia?'))return;bibData[ci].items.splice(ii,1);saveBib();renderBiblioteca();}
+
+function openAddCat(){
+  const html=`<div class="bib-modal" id="bib-modal">
+    <div class="bib-modal-box">
+      <div class="bib-modal-title">Nueva categoría</div>
+      <input id="bm-emoji" placeholder="Emoji (ej: 💪)" maxlength="4" style="width:70px;display:inline-block;margin-right:8px;">
+      <input id="bm-catname" placeholder="Nombre de la categoría" style="width:calc(100% - 86px);display:inline-block;">
+      <div class="bib-modal-btns">
+        <button class="bib-modal-cancel" onclick="closeBibModal()">Cancelar</button>
+        <button class="bib-modal-ok" onclick="confirmAddCat()">Crear</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend',html);
+}
+
+function confirmAddCat(){
+  const emoji=document.getElementById('bm-emoji').value.trim()||'📁';
+  const name=document.getElementById('bm-catname').value.trim();
+  if(!name){alert('Ponele un nombre a la categoría');return;}
+  bibData.push({id:'bib-'+Date.now(),emoji,name,open:true,items:[]});
+  saveBib();closeBibModal();renderBiblioteca();
+}
+
+function openAddItem(ci){
+  const html=`<div class="bib-modal" id="bib-modal">
+    <div class="bib-modal-box">
+      <div class="bib-modal-title">Agregar referencia en "${bibData[ci].name}"</div>
+      <select id="bm-type" onchange="bibTypeChange()">
+        <option value="link">🔗 Link (YouTube, web, etc.)</option>
+        <option value="file">📄 Archivo (imagen, PDF, video)</option>
+      </select>
+      <input id="bm-title" placeholder="Título (ej: Rutina de movilidad de cadera)">
+      <div id="bm-url-wrap"><input id="bm-url" placeholder="https://..." type="url"></div>
+      <div id="bm-file-wrap" style="display:none;">
+        <input id="bm-file" type="file" accept="image/*,video/*,application/pdf" style="background:none;border:none;padding:0;font-size:13px;">
+      </div>
+      <textarea id="bm-note" placeholder="Nota opcional…" rows="2" style="resize:none;"></textarea>
+      <div class="bib-modal-btns">
+        <button class="bib-modal-cancel" onclick="closeBibModal()">Cancelar</button>
+        <button class="bib-modal-ok" onclick="confirmAddItem(${ci})">Agregar</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend',html);
+}
+
+function bibTypeChange(){
+  const t=document.getElementById('bm-type').value;
+  document.getElementById('bm-url-wrap').style.display=t==='link'?'block':'none';
+  document.getElementById('bm-file-wrap').style.display=t==='file'?'block':'none';
+}
+
+async function confirmAddItem(ci){
+  const type=document.getElementById('bm-type').value;
+  const title=document.getElementById('bm-title').value.trim();
+  if(!title){alert('Ponele un título a la referencia');return;}
+  const note=document.getElementById('bm-note').value.trim();
+  const item={id:Date.now(),type,title,note,url:'',data:null};
+  if(type==='link'){
+    item.url=document.getElementById('bm-url').value.trim();
+  } else {
+    const file=document.getElementById('bm-file').files[0];
+    if(file){
+      // Convertir a base64 para guardar (solo funciona bien para archivos pequeños)
+      if(file.size>5*1024*1024){alert('El archivo es muy grande (máximo 5MB). Para videos grandes, mejor pegá el link de YouTube.');return;}
+      item.data=await new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsDataURL(file);});
+      item.url='';
+    }
+  }
+  bibData[ci].items.push(item);
+  bibData[ci].open=true;
+  saveBib();closeBibModal();renderBiblioteca();
+}
+
+function closeBibModal(){const m=document.getElementById('bib-modal');if(m)m.remove();}
+
+// ============================================================
+// CHATS IA (Psicólogo / Oráculo) — vía Groq API
+// ============================================================
+const GROQ_KEY = "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";
+const GROQ_MODEL = "llama-3.3-70b-versatile";
+
+// Carta natal calculada con efemérides reales para 12/08/1983, 11:11, Montevideo, Uruguay
+const NATAL_CHART = {
+  sol:'Leo 19°', luna:'Libra 12°', ascendente:'Escorpio 10°', mercurio:'Virgo 16°',
+  venus:'Virgo 8°', marte:'Cáncer 29°', jupiter:'Sagitario 1°', saturno:'Libra 29°',
+  urano:'Sagitario 5°', neptuno:'Sagitario 27°', pluton:'Libra 27°', medioCielo:'Sagitario 10°'
+};
+
+let iaChats = {}; // { '2026-06-30': {psi:[...], ora:[...]}, ... }
+
+function getChatsForDate(ds){
+  if(!iaChats[ds])iaChats[ds]={psi:[],ora:[]};
+  return iaChats[ds];
+}
+
+function saveIAChats(){
+  ssLocal('lux_ia_chats',iaChats);
+  if(window.__luxFirebaseReady&&window.__luxDb){
+    const ref=window.__luxDb.collection('lux_profiles').doc('lux-principal-chats');
+    ref.set({data:JSON.stringify(iaChats),_updatedAt:Date.now()}).catch(e=>console.error('Chat save error',e));
+  }
+}
+async function loadIAChats(){
+  const local=sgLocal('lux_ia_chats');if(local)iaChats=local;
+  if(window.__luxReadyPromise)await window.__luxReadyPromise;
+  if(window.__luxFirebaseReady&&window.__luxDb){
+    try{
+      const ref=window.__luxDb.collection('lux_profiles').doc('lux-principal-chats');
+      const snap=await ref.get();
+      if(snap.exists&&snap.data().data){
+        const d=JSON.parse(snap.data().data);
+        if(d){iaChats=d;ssLocal('lux_ia_chats',iaChats);}
+      }
+    }catch(e){console.error('Chat load error',e);}
+  }
+}
+
+function getSystemPromptPsi(){
+  return `Sos un espacio de escucha psicológica para Lucía, no un terapeuta que reemplaza terapia real. Tu enfoque integra conceptos reales y reconocidos de distintas corrientes: terapia cognitivo-conductual (TCC, reestructuración de pensamientos), psicología humanista (Rogers: escucha empática, no directiva), terapia de aceptación y compromiso (ACT: aceptar lo incómodo en vez de luchar contra ello), y apego (Bowlby/Ainsworth, cuando sea relevante para vínculos). 
+Tono: cálido, cercano, sin tecnicismos innecesarios, en español rioplatense natural (vos, no tú). Hacé preguntas abiertas antes de dar consejos. No diagnostiques. No reemplaces ayuda profesional — si detectás señales de crisis, sugerí buscar apoyo profesional o de personas de confianza, con calma, sin alarmar. Respuestas breves (3-6 oraciones), conversacionales, no como un ensayo.`;
+}
+
+function getMoonPhaseToday(){
+  return getMoonPhase(tds());
+}
+
+function getSystemPromptOra(){
+  const today=new Date();
+  const moonPhase=getMoonPhaseToday();
+  const cDay=getCycleDay();
+  const phase=getCyclePhase(cDay);
+  return `Sos un oráculo astrológico cálido e intuitivo para Lucía. Su carta natal real (calculada con efemérides astronómicas para 12/08/1983, 11:11am, Montevideo, Uruguay) es:
+Sol en ${NATAL_CHART.sol}, Luna en ${NATAL_CHART.luna}, Ascendente en ${NATAL_CHART.ascendente}, Mercurio en ${NATAL_CHART.mercurio}, Venus en ${NATAL_CHART.venus}, Marte en ${NATAL_CHART.marte}, Júpiter en ${NATAL_CHART.jupiter}, Saturno en ${NATAL_CHART.saturno}, Urano en ${NATAL_CHART.urano}, Neptuno en ${NATAL_CHART.neptuno}, Plutón en ${NATAL_CHART.pluton}, Medio Cielo en ${NATAL_CHART.medioCielo}.
+Hoy es ${today.toLocaleDateString('es-UY',{weekday:'long',day:'numeric',month:'long'})}, la fase lunar actual es ${moonPhase}${phase?`, y Lucía está en fase ${phase.name.toLowerCase()} de su ciclo (día ${cDay})`:''}.
+Hablá con calidez mística pero sin inventar tránsitos planetarios específicos que no podés calcular con precisión real — podés referirte de forma general a energías de la fase lunar, su Sol/Luna/Ascendente natal, y el momento del ciclo, conectándolo con lo que ella consulte. Evitá afirmaciones deterministas tipo "vas a..."; hablá en términos de energías, posibilidades y reflexión. Tono cercano, en español rioplatense (vos). Respuestas breves (3-6 oraciones), evocadoras pero no genéricas.`;
+}
+
+function toggleIAChat(key){
+  const body=document.getElementById('ia-body-'+key);
+  const arrow=document.getElementById('ia-arrow-'+key);
+  const isOpen=body.classList.contains('open');
+  body.classList.toggle('open',!isOpen);
+  arrow.classList.toggle('open',!isOpen);
+  if(!isOpen)renderIAChat(key);
+}
+
+function renderIAChat(key){
+  const ds=adate();
+  const chats=getChatsForDate(ds)[key];
+  const el=document.getElementById('ia-msgs-'+key);
+  const inp=document.getElementById('ia-input-'+key);
+  const sendBtn=document.getElementById('ia-send-'+key);
+  const ro=isFuture();
+  const sub=document.getElementById('ia-sub-'+key);
+  if(sub){
+    if(isToday())sub.textContent=key==='psi'?'Para pensar en voz alta, con marcos psicológicos reales':'Según tu carta natal y los tránsitos de hoy';
+    else sub.textContent='📅 Viendo conversación del '+fmtDate(ds);
+  }
+  if(inp){inp.disabled=ro;inp.placeholder=ro?'No disponible en días futuros':inp.dataset.ph||inp.placeholder;}
+  if(sendBtn)sendBtn.disabled=ro;
+  if(!chats.length){
+    el.innerHTML=`<div class="ia-chat-empty">${!isToday()?'No hay conversación guardada para este día.':(key==='psi'?'Este es un espacio para pensar en voz alta. Nada de lo que escribas se comparte con nadie más.':'Consultá lo que quieras saber. El oráculo tiene en cuenta tu carta natal y el momento astral de hoy.')}</div>`;
+    return;
+  }
+  el.innerHTML=chats.map(m=>`<div class="ia-msg ${m.role==='user'?'user':'bot'}">${m.content}</div>`).join('');
+  el.scrollTop=el.scrollHeight;
+}
+
+async function sendIAMsg(key){
+  if(isFuture())return;
+  const ds=adate();
+  const chats=getChatsForDate(ds)[key];
+  const inp=document.getElementById('ia-input-'+key);
+  const text=inp.value.trim();
+  if(!text)return;
+  const sendBtn=document.getElementById('ia-send-'+key);
+  inp.value='';
+  chats.push({role:'user',content:text});
+  renderIAChat(key);
+  sendBtn.disabled=true;
+  const el=document.getElementById('ia-msgs-'+key);
+  el.insertAdjacentHTML('beforeend','<div class="ia-msg typing" id="ia-typing-'+key+'">Escribiendo…</div>');
+  el.scrollTop=el.scrollHeight;
+  try{
+    const systemPrompt=key==='psi'?getSystemPromptPsi():getSystemPromptOra();
+    const messages=[{role:'system',content:systemPrompt},...chats.slice(-10)];
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+GROQ_KEY},
+      body:JSON.stringify({model:GROQ_MODEL,messages,temperature:0.8,max_tokens:400})
+    });
+    const data=await res.json();
+    const typingEl=document.getElementById('ia-typing-'+key);if(typingEl)typingEl.remove();
+    if(data.error){
+      chats.push({role:'assistant',content:'⚠️ No pude conectarme ahora. ('+data.error.message+')'});
+    } else {
+      const reply=data.choices[0].message.content;
+      chats.push({role:'assistant',content:reply});
+    }
+  }catch(e){
+    const typingEl=document.getElementById('ia-typing-'+key);if(typingEl)typingEl.remove();
+    chats.push({role:'assistant',content:'⚠️ Hubo un problema de conexión. Intentá de nuevo.'});
+  }
+  renderIAChat(key);
+  saveIAChats();
+  sendBtn.disabled=false;
+}
+
+function clearIAChat(key){
+  if(!confirm('¿Borrar la conversación de este día?'))return;
+  const ds=adate();
+  getChatsForDate(ds)[key]=[];
+  renderIAChat(key);
+  saveIAChats();
+}
+
+async function init(){await load();await loadBib();await loadIAChats();document.getElementById('app').dataset.dark=dark;updateDateUI();render();renderJournal();schedNotifs();_initDebugPanel();}
 init();
 </script>
 </body>
