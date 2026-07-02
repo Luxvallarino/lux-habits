@@ -94,7 +94,8 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
 .cal-phase{position:absolute;top:2px;right:3px;font-size:7px;line-height:1;}
 
 .tabs{display:flex;gap:6px;padding:0 18px 16px;}
-.tab{flex:1;padding:9px 4px;text-align:center;border-radius:14px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--t2);transition:all .2s;box-shadow:var(--shadow-sm);}
+.tab{flex:1;padding:8px 4px 7px;text-align:center;border-radius:14px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--t2);transition:all .2s;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;align-items:center;gap:3px;line-height:1.2;}
+.tab .tab-icon{font-size:18px;line-height:1;}
 .tab.on{background:var(--accent);color:#fff;border-color:transparent;box-shadow:0 4px 16px rgba(100,181,246,0.28);}
 .tab:not(.on):hover{background:var(--acc-hover);color:var(--accent);}
 .view{display:none;}.view.on{display:block;}
@@ -349,11 +350,11 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   </div>
   <div id="cal-dropdown" style="display:none;"></div>
   <div class="tabs">
-    <div class="tab on" onclick="switchTab('hoy')">☀️ Hábitos</div>
-    <div class="tab" onclick="switchTab('ciclo')">🌙 Ciclo</div>
-    <div class="tab" onclick="switchTab('journal')">📓 Diario</div>
-    <div class="tab" onclick="switchTab('biblioteca')">📚 Biblioteca</div>
-    <div class="tab" onclick="switchTab('stats')">📊 Stats</div>
+    <div class="tab on" onclick="switchTab('hoy')"><span class="tab-icon">☀️</span>Hábitos</div>
+    <div class="tab" onclick="switchTab('ciclo')"><span class="tab-icon">🌙</span>Ciclo</div>
+    <div class="tab" onclick="switchTab('journal')"><span class="tab-icon">📓</span>Diario</div>
+    <div class="tab" onclick="switchTab('biblioteca')"><span class="tab-icon">📚</span>Biblioteca</div>
+    <div class="tab" onclick="switchTab('stats')"><span class="tab-icon">📊</span>Stats</div>
   </div>
 
   <div id="v-hoy" class="view on">
@@ -989,11 +990,24 @@ let bibData = [
   {id:'bib-bienestar', emoji:'🧘', name:'Bienestar', open:false, items:[]},
 ];
 
-function saveBib(){
+async function saveBib(){
+  // Guardado local siempre primero
   ssLocal('lux_bib',bibData);
+  // Subir a Firestore en documento separado
+  if(window.__luxReadyPromise)await window.__luxReadyPromise;
   if(window.__luxFirebaseReady&&window.__luxDb){
-    const ref=window.__luxDb.collection('lux_profiles').doc('lux-principal-biblioteca');
-    ref.set({data:JSON.stringify(bibData),_updatedAt:Date.now()}).catch(e=>console.error('Bib save error',e));
+    try{
+      // Los archivos base64 pueden ser muy grandes — los excluimos del sync en la nube
+      // y los guardamos solo localmente para no exceder el límite de 1MB de Firestore
+      const bibForCloud=bibData.map(cat=>({
+        ...cat,
+        items:cat.items.map(item=>item.type==='file'?{...item,data:null,_localOnly:true}:item)
+      }));
+      const json=JSON.stringify(bibForCloud);
+      if(json.length>900000){console.warn('Biblioteca demasiado grande para Firestore, solo guardado local');return;}
+      const ref=window.__luxDb.collection('lux_profiles').doc('lux-principal-biblioteca');
+      await ref.set({data:json,_updatedAt:Date.now()});
+    }catch(e){console.error('Bib save error',e);}
   }
 }
 async function loadBib(){
@@ -1137,7 +1151,7 @@ async function confirmAddItem(ci){
   }
   bibData[ci].items.push(item);
   bibData[ci].open=true;
-  saveBib();closeBibModal();renderBiblioteca();
+  await saveBib();closeBibModal();renderBiblioteca();
 }
 
 function closeBibModal(){const m=document.getElementById('bib-modal');if(m)m.remove();}
