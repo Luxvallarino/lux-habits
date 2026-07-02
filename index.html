@@ -991,37 +991,42 @@ let bibData = [
 ];
 
 async function saveBib(){
-  // Guardado local siempre primero
   ssLocal('lux_bib',bibData);
-  // Subir a Firestore en documento separado
   if(window.__luxReadyPromise)await window.__luxReadyPromise;
+  luxLog('saveBib: __luxFirebaseReady='+window.__luxFirebaseReady+' __luxDb='+!!window.__luxDb,'#0ff');
   if(window.__luxFirebaseReady&&window.__luxDb){
     try{
-      // Los archivos base64 pueden ser muy grandes — los excluimos del sync en la nube
-      // y los guardamos solo localmente para no exceder el límite de 1MB de Firestore
       const bibForCloud=bibData.map(cat=>({
         ...cat,
         items:cat.items.map(item=>item.type==='file'?{...item,data:null,_localOnly:true}:item)
       }));
       const json=JSON.stringify(bibForCloud);
-      if(json.length>900000){console.warn('Biblioteca demasiado grande para Firestore, solo guardado local');return;}
+      luxLog('saveBib: json size='+json.length,'#0ff');
       const ref=window.__luxDb.collection('lux_profiles').doc('lux-principal-biblioteca');
       await ref.set({data:json,_updatedAt:Date.now()});
-    }catch(e){console.error('Bib save error',e);}
+      luxLog('saveBib: guardado OK','#0f0');
+    }catch(e){luxLog('saveBib ERROR: '+e.message,'#f00');console.error('Bib save error',e);}
+  } else {
+    luxLog('saveBib: Firebase no disponible','#f90');
   }
 }
 async function loadBib(){
   const local=sgLocal('lux_bib');if(local&&local.length)bibData=local;
   if(window.__luxReadyPromise)await window.__luxReadyPromise;
+  luxLog('loadBib: __luxFirebaseReady='+window.__luxFirebaseReady+' __luxDb='+!!window.__luxDb,'#0ff');
   if(window.__luxFirebaseReady&&window.__luxDb){
     try{
       const ref=window.__luxDb.collection('lux_profiles').doc('lux-principal-biblioteca');
       const snap=await ref.get();
+      luxLog('loadBib: snap.exists='+snap.exists,'#0ff');
       if(snap.exists&&snap.data().data){
         const d=JSON.parse(snap.data().data);
+        luxLog('loadBib: categorías='+d.length+' items='+d.reduce((a,c)=>a+c.items.length,0),'#0f0');
         if(d&&d.length){bibData=d;ssLocal('lux_bib',bibData);}
+      } else {
+        luxLog('loadBib: documento vacío o sin data','#f90');
       }
-    }catch(e){console.error('Bib load error',e);}
+    }catch(e){luxLog('loadBib ERROR: '+e.message,'#f00');console.error('Bib load error',e);}
   }
 }
 
