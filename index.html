@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -546,9 +547,11 @@ const QUOTES=[
   {text:"Cada mañana que empezás tu rutina es una victoria.",author:""},
 ];
 const DEFAULT_NOTIFS=[
-  {id:'sup',emoji:'💊',label:'Suplementos',time:'08:00',on:true,deletable:false},
   {id:'agua1',emoji:'💧',label:'Agua — 1° aviso',time:'13:00',on:true,deletable:false},
   {id:'agua2',emoji:'💧',label:'Agua — 2° aviso',time:'17:00',on:true,deletable:false},
+  {id:'agua3',emoji:'💧',label:'Agua — 3° aviso',time:'19:00',on:true,deletable:false},
+  {id:'crea',emoji:'💪',label:'Creatina',time:'11:00',on:true,deletable:false},
+  {id:'sup',emoji:'💊',label:'Suplementos',time:'22:00',on:true,deletable:false},
 ];
 
 let dark=0,curMood=null,viewDate=null,calOpen=false,calY=new Date().getFullYear(),calM=new Date().getMonth(),aiTab='week';
@@ -642,7 +645,14 @@ async function load(){
   const v=sgLocal(SK.v),m=sgLocal(SK.m),j=sgLocal(SK.j),c=sgLocal(SK.c),f=sgLocal(SK.f),
         fg=sgLocal(SK.fg),dk=sgLocal(SK.dk),nl=sgLocal(SK.nl),td=sgLocal(SK.td);
   if(v)vals=v;if(m)moodData=m;if(j)journalData=j;if(c)cycleData=c;if(f)fastState=f;
-  if(fg)fastGoalH=fg;if(dk!==null)dark=dk;if(nl&&nl.length)notifList=nl;if(td)tasksData=td;
+  if(fg)fastGoalH=fg;if(dk!==null)dark=dk;
+  if(nl&&nl.length){
+    const savedMap={};nl.forEach(n=>{savedMap[n.id]=n;});
+    const fixed=DEFAULT_NOTIFS.map(n=>({...n,on:savedMap[n.id]!==undefined?savedMap[n.id].on:n.on}));
+    const custom=nl.filter(n=>n.deletable!==false);
+    notifList=[...fixed,...custom].sort((a,b)=>a.time.localeCompare(b.time));
+  }
+  if(td)tasksData=td;
 
   // 2) Esperamos a que el módulo de Firebase haya terminado de inicializar
   //    (evita la carrera de tiempos entre el <script type="module"> y este script)
@@ -664,7 +674,15 @@ async function load(){
         if(d[SK.f])fastState=d[SK.f];
         if(d[SK.fg])fastGoalH=d[SK.fg];
         if(d[SK.dk]!==undefined&&d[SK.dk]!==null)dark=d[SK.dk];
-        if(d[SK.nl]&&d[SK.nl].length)notifList=d[SK.nl];
+        if(d[SK.nl]&&d[SK.nl].length){
+          // Mergeamos: los fijos (deletable:false) siempre vienen de DEFAULT_NOTIFS
+          // preservando solo el on/off que guardó la usuaria
+          const savedMap={};d[SK.nl].forEach(n=>{savedMap[n.id]=n;});
+          const fixed=DEFAULT_NOTIFS.map(n=>({...n,on:savedMap[n.id]!==undefined?savedMap[n.id].on:n.on}));
+          const custom=d[SK.nl].filter(n=>n.deletable!==false);
+          // Ordenar todo por hora
+          notifList=[...fixed,...custom].sort((a,b)=>a.time.localeCompare(b.time));
+        }
         // guardamos también una copia local actualizada
         ssLocal(SK.v,vals);ssLocal(SK.m,moodData);ssLocal(SK.j,journalData);ssLocal(SK.c,cycleData);
         ssLocal(SK.f,fastState);ssLocal(SK.fg,fastGoalH);ssLocal(SK.dk,dark);ssLocal(SK.nl,notifList);ssLocal(SK.td,tasksData);
@@ -859,26 +877,48 @@ function addN(){notifList.push({id:'c_'+Date.now(),emoji:'🔔',label:'Nuevo rec
 async function reqPerm(){if(!('Notification'in window)){document.getElementById('notif-status').textContent='No soportado.';return;}const p=await Notification.requestPermission();const el=document.getElementById('notif-status');if(p==='granted'){el.textContent='✓ Activadas.';el.style.color='var(--green)';schedNotifs();}else{el.textContent='Permiso denegado.';el.style.color='#ef4444';}}
 function schedNotifs(){
   if(!('Notification'in window)||Notification.permission!=='granted')return;
-  // Cancela el intervalo anterior si existe
+  // Cancela timers anteriores
+  if(window.__notifTimers)window.__notifTimers.forEach(t=>clearTimeout(t));
+  window.__notifTimers=[];
   if(window.__notifInterval)clearInterval(window.__notifInterval);
-  // Chequea cada minuto si hay alguna notificación para disparar
-  window.__notifInterval=setInterval(()=>{
+
+  function programarDelDia(){
+    if(window.__notifTimers)window.__notifTimers.forEach(t=>clearTimeout(t));
+    window.__notifTimers=[];
     const now=new Date();
-    const hh=String(now.getHours()).padStart(2,'0');
-    const mm=String(now.getMinutes()).padStart(2,'0');
-    const current=hh+':'+mm;
-    notifList.filter(n=>n.on&&n.time===current).forEach(n=>{
-      new Notification(n.emoji+' '+n.label,{body:'Recordatorio de tu rutina · Lux',icon:'https://luxvallarino.github.io/lux-habits/icon.svg'});
+    notifList.filter(n=>n.on).forEach(n=>{
+      const[h,m]=n.time.split(':').map(Number);
+      const target=new Date();
+      target.setHours(h,m,0,0);
+      const ms=target-now;
+      if(ms>0&&ms<86400000){ // solo si es en las próximas 24h
+        const t=setTimeout(()=>{
+          new Notification(n.emoji+' '+n.label,{
+            body:'Recordatorio Lux',
+            icon:'https://luxvallarino.github.io/lux-habits/favicon.ico',
+            badge:'https://luxvallarino.github.io/lux-habits/favicon.ico',
+            tag:n.id // evita notificaciones duplicadas
+          });
+        },ms);
+        window.__notifTimers.push(t);
+      }
     });
-  },60000);
-  // También dispara inmediatamente si alguna notif es en el minuto actual
+  }
+
+  // Programa al iniciar
+  programarDelDia();
+
+  // Re-programa a medianoche (para el día siguiente)
   const now=new Date();
-  const hh=String(now.getHours()).padStart(2,'0');
-  const mm=String(now.getMinutes()).padStart(2,'0');
-  const current=hh+':'+mm;
-  notifList.filter(n=>n.on&&n.time===current).forEach(n=>{
-    new Notification(n.emoji+' '+n.label,{body:'Recordatorio de tu rutina · Lux',icon:'https://luxvallarino.github.io/lux-habits/icon.svg'});
-  });
+  const midnight=new Date(now);
+  midnight.setHours(24,0,0,0);
+  setTimeout(()=>{programarDelDia();schedNotifs();},midnight-now);
+
+  // Re-programa cada vez que la página vuelve a ser visible
+  // (cuando desbloqueás el celu o volvés a la app)
+  document.removeEventListener('visibilitychange',window.__notifVisHandler);
+  window.__notifVisHandler=()=>{if(!document.hidden)programarDelDia();};
+  document.addEventListener('visibilitychange',window.__notifVisHandler);
 }
 
 function renderStats(){
