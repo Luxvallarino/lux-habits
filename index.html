@@ -377,6 +377,47 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
   <div id="v-journal" class="view">
     <div class="j-wrap" style="padding-top:6px;">
       <div id="j-ro-banner" style="display:none;"></div>
+      <div class="j-card" style="background:linear-gradient(135deg,var(--acc-light),var(--card));border:1px solid var(--accent)20;">
+        <label style="color:var(--accent);">🌸 Inicio del día</label>
+        <div style="font-size:12px;color:var(--t2);margin-bottom:10px;font-weight:500;">Dos agradecimientos y una intención para hoy</div>
+        <textarea id="j-grat1" placeholder="🙏 Agradezco…&#10;🙏 Agradezco…&#10;✨ Hoy me propongo…" oninput="ar(this)" style="min-height:90px;"></textarea>
+        <button class="j-save" style="margin-top:10px;font-size:13px;padding:9px;" onclick="saveGratitud()">Guardar</button>
+        <div id="j-grat-fb" style="text-align:center;"></div>
+      </div>
+      <!-- Chat Psicólogo -->
+      <div class="ia-chat-card">
+        <div class="ia-chat-header" onclick="toggleIAChat('psi')">
+          <span class="ia-chat-emoji">🧠</span>
+          <div class="ia-chat-title"><h3>Espacio de escucha</h3><p id="ia-sub-psi">Para pensar en voz alta, con marcos psicológicos reales</p></div>
+          <span class="ia-chat-arrow" id="ia-arrow-psi">▼</span>
+        </div>
+        <div class="ia-chat-body" id="ia-body-psi">
+          <div class="ia-chat-msgs" id="ia-msgs-psi"></div>
+          <div class="ia-chat-input-row">
+            <textarea id="ia-input-psi" placeholder="Escribí lo que estás pensando o sintiendo…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendIAMsg('psi');}"></textarea>
+            <button class="ia-chat-send" id="ia-send-psi" onclick="sendIAMsg('psi')">➤</button>
+          </div>
+          <div class="ia-chat-clear" onclick="clearIAChat('psi')">Borrar conversación</div>
+        </div>
+      </div>
+
+      <!-- Chat Oráculo -->
+      <div class="ia-chat-card">
+        <div class="ia-chat-header" onclick="toggleIAChat('ora')">
+          <span class="ia-chat-emoji">🔮</span>
+          <div class="ia-chat-title"><h3>Oráculo</h3><p id="ia-sub-ora">Según tu carta natal y los tránsitos de hoy</p></div>
+          <span class="ia-chat-arrow" id="ia-arrow-ora">▼</span>
+        </div>
+        <div class="ia-chat-body" id="ia-body-ora">
+          <div class="ia-chat-msgs" id="ia-msgs-ora"></div>
+          <div class="ia-chat-input-row">
+            <textarea id="ia-input-ora" placeholder="¿Qué querés consultar?" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendIAMsg('ora');}"></textarea>
+            <button class="ia-chat-send" id="ia-send-ora" onclick="sendIAMsg('ora')">➤</button>
+          </div>
+          <div class="ia-chat-clear" onclick="clearIAChat('ora')">Borrar conversación</div>
+        </div>
+      </div>
+
       <div class="j-card">
         <label>😊 Estado de ánimo</label>
         <div class="mood-scale" id="j-mood-scale">
@@ -424,40 +465,6 @@ body::before{content:'';position:fixed;inset:0;background-image:url("data:image/
         </div>
       </div>
 
-      <!-- Chat Psicólogo -->
-      <div class="ia-chat-card">
-        <div class="ia-chat-header" onclick="toggleIAChat('psi')">
-          <span class="ia-chat-emoji">🧠</span>
-          <div class="ia-chat-title"><h3>Espacio de escucha</h3><p id="ia-sub-psi">Para pensar en voz alta, con marcos psicológicos reales</p></div>
-          <span class="ia-chat-arrow" id="ia-arrow-psi">▼</span>
-        </div>
-        <div class="ia-chat-body" id="ia-body-psi">
-          <div class="ia-chat-msgs" id="ia-msgs-psi"></div>
-          <div class="ia-chat-input-row">
-            <textarea id="ia-input-psi" placeholder="Escribí lo que estás pensando o sintiendo…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendIAMsg('psi');}"></textarea>
-            <button class="ia-chat-send" id="ia-send-psi" onclick="sendIAMsg('psi')">➤</button>
-          </div>
-          <div class="ia-chat-clear" onclick="clearIAChat('psi')">Borrar conversación</div>
-        </div>
-      </div>
-
-      <!-- Chat Oráculo -->
-      <div class="ia-chat-card">
-        <div class="ia-chat-header" onclick="toggleIAChat('ora')">
-          <span class="ia-chat-emoji">🔮</span>
-          <div class="ia-chat-title"><h3>Oráculo</h3><p id="ia-sub-ora">Según tu carta natal y los tránsitos de hoy</p></div>
-          <span class="ia-chat-arrow" id="ia-arrow-ora">▼</span>
-        </div>
-        <div class="ia-chat-body" id="ia-body-ora">
-          <div class="ia-chat-msgs" id="ia-msgs-ora"></div>
-          <div class="ia-chat-input-row">
-            <textarea id="ia-input-ora" placeholder="¿Qué querés consultar?" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendIAMsg('ora');}"></textarea>
-            <button class="ia-chat-send" id="ia-send-ora" onclick="sendIAMsg('ora')">➤</button>
-          </div>
-          <div class="ia-chat-clear" onclick="clearIAChat('ora')">Borrar conversación</div>
-        </div>
-      </div>
-
       <div class="ai-card">
         <h3>✦ Análisis con IA</h3>
         <div class="ai-sub">Reflexiones de esta semana o este mes</div>
@@ -500,6 +507,9 @@ const HABITS=[
   {id:2,cat:'🌅 Mañana',name:'Jugo detox',emoji:'🥬',color:'#16a34a',type:'check'},
   {id:3,cat:'🌅 Mañana',name:'Electrolitos',emoji:'⚡',color:'#0ea5e9',type:'check'},
   {id:4,cat:'🌅 Mañana',name:'Creatina',emoji:'💪',color:'#7c3aed',type:'check'},
+  {id:24,cat:'🌅 Mañana',name:'Melena de León',emoji:'🍄',color:'#a16207',type:'check'},
+  {id:25,cat:'🌅 Mañana',name:'Suplementos mañana',emoji:'💊',color:'#0891b2',type:'check',sub:'Magnesio · Calcio · Colágeno · Vit D'},
+  {id:26,cat:'🌅 Mañana',name:'Ashwagandha',emoji:'🌿',color:'#16a34a',type:'check'},
   {id:22,cat:'🌅 Mañana',name:'Afirmaciones',emoji:'🌟',color:'#f59e0b',type:'check'},
   {id:6,cat:'💧 Nutrición',name:'Agua',emoji:'💧',color:'#3b82f6',type:'qty',target:2500,unit:'ml',step:250},
   {id:18,cat:'💧 Nutrición',name:'Alimentación saludable',emoji:'🥗',color:'#16a34a',type:'check',sub:'Marcá si comiste limpio hoy'},
@@ -513,7 +523,8 @@ const HABITS=[
   {id:12,cat:'🌙 Noche',name:'Skincare nocturno',emoji:'🧴',color:'#ec4899',type:'check'},
   {id:21,cat:'🌙 Noche',name:'Yoga facial',emoji:'✨',color:'#f472b6',type:'check'},
   {id:14,cat:'🌙 Noche',name:'Botas de drenaje',emoji:'🥾',color:'#64748b',type:'check'},
-  {id:5,cat:'🌙 Noche',name:'Suplementos',emoji:'💊',color:'#d946ef',type:'check',sub:'Magnesio · Ashwagandha · Colágeno · Vit D'},
+  {id:5,cat:'🌙 Noche',name:'Suplementos noche',emoji:'💊',color:'#d946ef',type:'check',sub:'Magnesio Glicinato'},
+  {id:27,cat:'🌙 Noche',name:'Ashwagandha',emoji:'🌿',color:'#16a34a',type:'check'},
   {id:23,cat:'🌙 Noche',name:'Afirmaciones',emoji:'🌟',color:'#f59e0b',type:'check'},
   {id:15,cat:'🚫 Límites',name:'Sin alcohol',emoji:'🍷',color:'#b91c1c',type:'avoid'},
   {id:16,cat:'🚫 Límites',name:'Sin ultra procesados',emoji:'🚫',color:'#78350f',type:'avoid'},
@@ -557,7 +568,7 @@ const DEFAULT_NOTIFS=[
 
 let dark=0,curMood=null,viewDate=null,calOpen=false,calY=new Date().getFullYear(),calM=new Date().getMonth(),aiTab='week';
 let vals={},moodData={},journalData={},tasksData={};
-let cycleData={lastPeriod:null,cycleLen:28},fastState={running:false,start:null},fastGoalH=16,fastInterval=null;
+let cycleData={lastPeriod:null,cycleLen:28,history:[]},fastState={running:false,start:null},fastGoalH=16,fastInterval=null;
 let notifList=[...DEFAULT_NOTIFS];
 const MAX_TASKS=5;
 
@@ -815,15 +826,17 @@ function selMood(m){if(isFuture())return;curMood=m;const meta=MM[m];document.que
 
 function saveRC(){if(isFuture())return;const ds=adate();const rc={hecho:document.getElementById('rc-hecho')?.value||'',p1:document.getElementById('rc-p1')?.value||'',e1:document.getElementById('rc-e1')?.value||'',a1:document.getElementById('rc-a1')?.value||'',r1:document.getElementById('rc-r1')?.value||'',p2:document.getElementById('rc-p2')?.value||'',e2:document.getElementById('rc-e2')?.value||'',a2:document.getElementById('rc-a2')?.value||'',r2:document.getElementById('rc-r2')?.value||''};journalData[ds]={...(journalData[ds]||{}),rc};save();}
 function loadRC(ds){const rc=(journalData[ds]||{}).rc||{};['hecho','p1','e1','a1','r1','p2','e2','a2','r2'].forEach(k=>{const el=document.getElementById('rc-'+k);if(el){el.value=rc[k]||'';ar(el);}});}
+function saveGratitud(){if(isFuture())return;const ds=adate();const g1=document.getElementById('j-grat1').value.trim();journalData[ds]={...(journalData[ds]||{}),grat1:g1};save();const fb=document.getElementById('j-grat-fb');fb.innerHTML='<span class="saved-badge">✓ Guardado</span>';setTimeout(()=>{fb.innerHTML='';},2500);}
 function saveJournal(){if(isFuture())return;const ds=adate();const q1=document.getElementById('j-q1').value.trim(),q2=document.getElementById('j-q2').value.trim(),q3=document.getElementById('j-q3').value.trim(),q4=document.getElementById('j-q4').value.trim();journalData[ds]={...(journalData[ds]||{}),mood:curMood,q1,q2,q3,q4,ts:Date.now()};if(curMood)moodData[ds]={...(moodData[ds]||{}),level:curMood};sv(9,1);render();save();const fb=document.getElementById('j-fb');fb.innerHTML='<span class="saved-badge">✓ Reflexión guardada</span>';setTimeout(()=>{fb.innerHTML='';},3000);}
 
 function renderJournal(){
   const ds=adate(),ro=isFuture();
   const jrb=document.getElementById('j-ro-banner'),jsw=document.getElementById('j-save-wrap');
-  if(ro){jrb.style.display='block';jrb.innerHTML=`<div class="ro-banner">📅 Viendo ${fmtDate(ds)} — día futuro</div>`;jsw.style.display='none';document.querySelectorAll('#j-mood-scale .mb').forEach(b=>b.classList.add('ro'));['j-q1','j-q2','j-q3','j-q4'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=true;});}
-  else{jrb.style.display='none';jsw.style.display='block';document.querySelectorAll('#j-mood-scale .mb').forEach(b=>b.classList.remove('ro'));['j-q1','j-q2','j-q3','j-q4'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=false;});}
+  if(ro){jrb.style.display='block';jrb.innerHTML=`<div class="ro-banner">📅 Viendo ${fmtDate(ds)} — día futuro</div>`;jsw.style.display='none';document.querySelectorAll('#j-mood-scale .mb').forEach(b=>b.classList.add('ro'));['j-q1','j-q2','j-q3','j-q4','j-grat1'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=true;});const gb=document.getElementById('j-grat-fb');if(gb)gb.style.display='none';}
+  else{jrb.style.display='none';jsw.style.display='block';document.querySelectorAll('#j-mood-scale .mb').forEach(b=>b.classList.remove('ro'));['j-q1','j-q2','j-q3','j-q4','j-grat1'].forEach(id=>{const el=document.getElementById(id);if(el)el.disabled=false;});}
   const e=journalData[ds];
   ['j-q1','j-q2','j-q3','j-q4'].forEach((id,i)=>{const el=document.getElementById(id);const k=i<3?'q'+(i+1):'q4';if(el){el.value=e&&e[k]?e[k]:'';ar(el);}});
+  ['j-grat1'].forEach((id,i)=>{const el=document.getElementById(id);if(el){el.value=e&&e['grat1']?e['grat1']:'';ar(el);}});
   loadRC(ds);
   document.querySelectorAll('#j-mood-scale .mb').forEach(b=>b.classList.remove('sel'));
   const mt=document.getElementById('mood-txt');if(mt){mt.textContent='Tocá cómo te sentís hoy';mt.style.color='var(--t3)';}
@@ -849,19 +862,55 @@ async function getAI(){
 
 function renderCiclo(){
   const cDay=getCycleDay(),phase=getCyclePhase(cDay),lp=cycleData.lastPeriod;
-  let nextPeriod='—',daysUntil='—';
-  if(lp){const d=new Date(lp+'T12:00:00');d.setDate(d.getDate()+cycleData.cycleLen);nextPeriod=d.toLocaleDateString('es-UY',{day:'numeric',month:'long'});}
+  if(!cycleData.history)cycleData.history=[];
+  let nextPeriod='—',daysUntil='—',nextDate=null,desfase='';
+  if(lp){
+    nextDate=new Date(lp+'T12:00:00');
+    nextDate.setDate(nextDate.getDate()+cycleData.cycleLen);
+    nextPeriod=nextDate.toLocaleDateString('es-UY',{day:'numeric',month:'long'});
+    const hoy=new Date();hoy.setHours(12,0,0,0);
+    const diff=Math.round((hoy-nextDate)/864e5);
+    if(diff>0)desfase=`<span style="color:#ef4444;font-weight:700;">⚠️ ${diff} día${diff>1?'s':''} de atraso</span>`;
+    else if(diff===0)desfase=`<span style="color:var(--rose);font-weight:700;">📍 Se espera hoy</span>`;
+    else desfase=`<span style="color:var(--t2);">Faltan ${Math.abs(diff)} días</span>`;
+  }
   if(cDay){const rem=cycleData.cycleLen-cDay+1;daysUntil=rem<=0?'Hoy':rem+' días';}
+  const avgLen=cycleData.history.length>=2?Math.round(cycleData.history.slice(-6).reduce((s,c)=>s+c.cycleLen,0)/Math.min(cycleData.history.slice(-6).length,6)):null;
   const pBars=CYCLE_PHASES.map(p=>{const a=phase&&phase.name===p.name;const w=Math.round((p.days[1]-p.days[0]+1)/cycleData.cycleLen*100);return`<div class="cp" style="background:${p.color};opacity:${a?1:0.2};flex:${w};${a?'box-shadow:0 0 10px '+p.color+'60;':''}"></div>`;}).join('');
+  const histHTML=cycleData.history.length?`<div class="cycle-card"><div style="font-size:14px;font-weight:700;color:var(--t1);margin-bottom:10px;">📊 Historial de ciclos</div>${[...cycleData.history].reverse().slice(0,6).map((h,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--sep);font-size:13px;"><span style="color:var(--t2);">${new Date(h.date+'T12:00:00').toLocaleDateString('es-UY',{day:'numeric',month:'short'})}</span><span style="font-weight:600;color:var(--t1);">${h.cycleLen} días</span></div>`).join('')}${avgLen?`<div style="margin-top:10px;font-size:12px;color:var(--t2);text-align:center;">Promedio real: <strong style="color:var(--accent);">${avgLen} días</strong></div>`:''}</div>`:'';
   document.getElementById('ciclo-content').innerHTML=`<div style="height:4px;"></div>
   <div class="cycle-card"><div style="display:flex;align-items:center;gap:11px;margin-bottom:4px;"><div class="hico" style="background:${phase?phase.color+'20':'var(--sep)'};">${phase?phase.emoji:'🍂'}</div><div><div style="font-size:18px;font-weight:700;color:var(--accent);">${phase?phase.name:'Sin datos'}</div><div style="font-size:12px;color:var(--t2);font-weight:500;">${cDay?'Día '+cDay+' de '+cycleData.cycleLen:'Registrá tu último período'}</div></div></div>
   <div class="cycle-phases">${pBars}</div>${phase?`<div class="cycle-phase-info"><span class="cp-icon">${phase.emoji}</span><div class="cp-text"><h4>${phase.name}</h4><p>${phase.tip}</p></div></div>`:''}
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;"><div style="background:var(--sep);border-radius:13px;padding:13px;text-align:center;"><div style="font-size:22px;font-weight:700;color:var(--accent);">${cDay||'—'}</div><div style="font-size:11px;color:var(--t2);font-weight:500;">Día del ciclo</div></div><div style="background:var(--sep);border-radius:13px;padding:13px;text-align:center;"><div style="font-size:16px;font-weight:700;color:var(--rose);">${daysUntil}</div><div style="font-size:11px;color:var(--t2);font-weight:500;">Próximo período</div></div></div></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;"><div style="background:var(--sep);border-radius:13px;padding:13px;text-align:center;"><div style="font-size:22px;font-weight:700;color:var(--accent);">${cDay||'—'}</div><div style="font-size:11px;color:var(--t2);font-weight:500;">Día del ciclo</div></div><div style="background:var(--sep);border-radius:13px;padding:13px;text-align:center;"><div style="font-size:14px;font-weight:700;color:var(--rose);">${nextPeriod}</div><div style="font-size:11px;color:var(--t2);font-weight:500;margin-top:2px;">${desfase}</div></div></div></div>
   ${phase?`<div class="cycle-card"><div style="font-size:14px;font-weight:700;color:var(--t1);margin-bottom:4px;display:flex;align-items:center;gap:8px;">${phase.emoji} Sugerencias para hoy</div><div style="font-size:12px;color:var(--t2);margin-bottom:12px;font-weight:500;">Pensadas para tu energía en fase ${phase.name.toLowerCase()}</div>${phase.suggestions.map(s=>`<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--sep);"><span style="color:${phase.color};font-size:14px;line-height:1.4;">●</span><span style="font-size:13px;color:var(--t1);line-height:1.4;">${s}</span></div>`).join('')}</div>`:''}
-  <div class="cycle-card"><div style="font-size:14px;font-weight:700;margin-bottom:13px;color:var(--t1);">📅 Registrar período</div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-size:13px;color:var(--t2);font-weight:500;flex:1;">Fecha inicio:</span><input type="date" id="period-date" class="cdr-input" value="${lp||''}" max="${tds()}"><button class="cdr-btn" onclick="savePeriod()">Guardar</button></div><div class="cycle-notif">💡 <strong>Siguiente período estimado:</strong> ${nextPeriod}<br>Ciclo: ${cycleData.cycleLen} días · <span style="cursor:pointer;color:var(--accent);font-weight:700;" onclick="changeCycleLen()">Cambiar duración</span></div></div>
+  <div class="cycle-card"><div style="font-size:14px;font-weight:700;margin-bottom:13px;color:var(--t1);">📅 Registrar período</div>
+  <div style="font-size:12px;color:var(--t2);margin-bottom:10px;line-height:1.5;">Cuando te llegue, registrá la fecha real. Si es distinta al estimado, el sistema recalculará tu ciclo promedio automáticamente.</div>
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="font-size:13px;color:var(--t2);font-weight:500;flex:1;">Fecha de inicio:</span><input type="date" id="period-date" class="cdr-input" value="${lp||''}" max="${tds()}"><button class="cdr-btn" onclick="savePeriod()">Confirmar</button></div>
+  <div class="cycle-notif" style="margin-top:10px;">💡 <strong>Próximo estimado:</strong> ${nextPeriod} · ${desfase}<br>Ciclo actual: ${cycleData.cycleLen} días${avgLen?' (promedio real: '+avgLen+'d)':''} · <span style="cursor:pointer;color:var(--accent);font-weight:700;" onclick="changeCycleLen()">Ajustar manualmente</span></div></div>
+  ${histHTML}
   <div class="cycle-card"><div style="font-size:14px;font-weight:700;color:var(--t1);margin-bottom:12px;">Guía de fases</div>${CYCLE_PHASES.map(p=>`<div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--sep);"><div style="width:36px;height:36px;border-radius:10px;background:${p.color}20;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">${p.emoji}</div><div><div style="font-size:13px;font-weight:600;">Días ${p.days[0]}–${p.days[1]}: ${p.name}</div><div style="font-size:12px;color:var(--t2);margin-top:2px;font-weight:400;">${p.tip}</div></div></div>`).join('')}</div><div style="height:8px;"></div>`;
 }
-function savePeriod(){const v=document.getElementById('period-date').value;if(!v)return;cycleData.lastPeriod=v;save();renderCiclo();}
+function savePeriod(){
+  const v=document.getElementById('period-date').value;
+  if(!v)return;
+  if(!cycleData.history)cycleData.history=[];
+  // Si ya hay un período anterior, calculamos la duración real de ese ciclo
+  if(cycleData.lastPeriod&&cycleData.lastPeriod!==v){
+    const prev=new Date(cycleData.lastPeriod+'T12:00:00');
+    const curr=new Date(v+'T12:00:00');
+    const realLen=Math.round((curr-prev)/864e5);
+    // Solo guardamos en historial si es un período distinto y la duración es razonable
+    if(realLen>=18&&realLen<=45){
+      cycleData.history.push({date:cycleData.lastPeriod,cycleLen:realLen});
+      // Recalcular promedio con los últimos 6 ciclos
+      const recent=cycleData.history.slice(-6);
+      const avg=Math.round(recent.reduce((s,c)=>s+c.cycleLen,0)/recent.length);
+      cycleData.cycleLen=avg;
+    }
+  }
+  cycleData.lastPeriod=v;
+  save();renderCiclo();
+}
 function changeCycleLen(){const v=prompt('Duración del ciclo en días:',cycleData.cycleLen);if(v&&!isNaN(v)){cycleData.cycleLen=parseInt(v);save();renderCiclo();}}
 
 function renderNotif(){
